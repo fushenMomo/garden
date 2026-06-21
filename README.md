@@ -57,6 +57,3 @@ MySQL 建表脚本：
 - `merge_server.py` — 合服脚本
 - `merge_server_verify_*.sql` — 合服校验
 - `requirements-merge.txt` — Python 依赖
-
-## .cursor/plans/
-设计文档（合服、分表、缓存框架等），非运行时代码。
