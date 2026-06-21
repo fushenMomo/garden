@@ -1,0 +1,4 @@
+sed -i 's/\r$//' test_kick.sh
+
+bash ./test_kick.sh 192.168.178.129 88 1018168 2
+

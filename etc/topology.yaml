@@ -1,0 +1,104 @@
+# 进程拓扑描述（单一数据源，由 tools/gen_config.lua 生成 config.* / clustername.* / start.sh）
+# 命名: {type}_{server_id}_{proc_id}，type=进程类型，server_id=服务器组编号，proc_id=组内进程编号
+
+host: "127.0.0.1"
+
+ports:
+  cluster:
+    webapi: 2525
+    login: 2526
+    servermgr: 2527
+    worldmgr_base: 2528      # worldMgr_{sid}_1 => base + (sid - 1)
+    gateway_base: 2530         # gateway_{sid}_{pid} => base + 前序组gateway总数 + (pid - 1)
+    world_base: 2540           # world_{sid}_{pid} => base + 前序组world总数 + (pid - 1)
+  tcp:
+    login: 8888
+    webapi: 8900
+    gateway_base: 8889         # gateway_{sid}_{pid} => base + 前序组gateway总数 + (pid - 1)
+
+global:
+  login: {}
+  serverMgr:
+    server_id: 1
+    proc_id: 1
+
+groups:
+  - id: 1
+    gateway_count: 2
+    world_count: 2
+    redis_port: 6379
+  - id: 2
+    gateway_count: 2
+    world_count: 2
+    redis_port: 8000
+
+startup_order:
+  - serverMgr_1_1
+  - login
+  - webAPI
+  - gateway_1_1
+  - gateway_1_2
+  - worldMgr_1_1
+  - world_1_1
+  - world_1_2
+  - gateway_2_1
+  - gateway_2_2
+  - worldMgr_2_1
+  - world_2_1
+  - world_2_2
+
+skynet:
+  thread: 8
+  harbor: 0
+  bootstrap: "snlua bootstrap"
+  lualoader: "./lualib/loader.lua"
+  lua_path: "./lualib/?.lua;./lualib/?/init.lua;../?.lua"
+  lua_cpath: "./luaclib/?.so"
+  cpath: "./cservice/?.so"
+  logger_level: "INFO"
+
+process:
+  webAPI:
+    start: "webAPI_main"
+    luaservice: "../webAPI/?.lua;../common/?.lua;./service/?.lua;"
+    http_agent_count: 8
+    http_body_limit: 65536
+  login:
+    start: "login_main"
+    luaservice: "../login/?.lua;../common/?.lua;./service/?.lua;"
+    login_maxclient: 1024
+    login_package_max: 8192
+  serverMgr:
+    start: "serverMgr_main"
+    luaservice: "../serverMgr/?.lua;../common/?.lua;./service/?.lua;"
+  gateway:
+    start: "gateway_main"
+    luaservice: "../gateway/?.lua;../common/?.lua;./service/?.lua;"
+    gateway_maxclient: 1024
+    gateway_package_max: 8192
+  worldMgr:
+    start: "worldMgr_main"
+    luaservice: "../worldMgr/?.lua;../common/?.lua;./service/?.lua;"
+  world:
+    start: "world_main"
+    luaservice: "../world/?.lua;../common/?.lua;./service/?.lua;"
+    world_maxclient: 2048
+
+db:
+  login:
+    name: "sk_login"
+    host: "192.168.178.129"
+    port: 3306
+    user: "yaofan"
+    password: "123456"
+  game:
+    name: "sk_s%s_game"
+    host: "192.168.178.129"
+    port: 3306
+    user: "yaofan"
+    password: "123456"
+
+redis:
+  host: "192.168.178.129"
+  password: "r12345"
+  db_index: 1

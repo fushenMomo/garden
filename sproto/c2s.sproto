@@ -1,0 +1,165 @@
+.package {
+    type 0 : integer
+    session 1 : integer
+}
+
+#######################登录服的协议################################
+
+register 1 {
+    request {
+        account_name 0 : string #帐号名
+        password 1 : string #密码
+        platform 2 : integer #渠道ID
+    }
+    
+    response {
+        error_code 0 : integer #错误码，0代表正常
+        account_name 1 : string #帐号名
+        acc_id 2 : integer #帐号唯一ID
+    }
+}
+
+
+#服务器信息
+.serverInfo {
+    server_id 0 : integer
+    server_num 1 : integer
+    server_name 2 : string
+    server_state 3 : integer
+    server_flag 4 : integer
+}
+
+login 2 {
+    request {
+        account_name 0 : string #帐号名
+        password 1 : string #密码
+        platform 2 : integer #渠道ID
+    }
+
+    response {
+        error_code 0 : integer #错误码，0代表正常
+        account_name 1 : string #帐号名
+        acc_id 2 : integer #帐号唯一ID
+        server_list 3 : *serverInfo #服务器列表
+        token 4 : string #提供给后面加入游戏服时验证
+        last_server_id 5 : integer #最近一次选择的服务器ID, 为0表示之前没有选择
+    }
+}
+
+heartbeat 3 {
+    request {}
+
+    response {
+        error_code 0 : integer #错误码，0代表正常
+        server_time 1 : integer #服务器时间戳
+    }
+}
+
+#选择游戏服务器
+selectServer 4 {
+    request {
+                server_id 0 : integer #服务器ID
+            }
+    
+    response {
+                error_code 0 : integer #错误码，0代表正常
+                server_id 1 : integer #服务器ID
+                server_host 2 : string #服务器主机地址
+                server_port 3 : integer #服务器端口
+            }
+}
+
+########################游戏服的协议###################################
+
+#进入游戏服务器
+joinGame 5 {
+    request {
+                acc_id 0 : integer #用户唯一id
+                token 1 : string #登录时获得的
+            }
+
+    response {
+                error_code 0 : integer #错误码，0代表正常
+            }
+}
+
+#游戏服心跳（joinGame 之后由 gateway 转发到 world 处理）
+heartbeatGame 6 {
+    request {}
+
+    response {
+                error_code 0 : integer
+                server_time 1 : integer
+            }
+}
+
+#修改角色昵称
+changeRoleName 7 {
+    request {
+                new_name 0 : string #新昵称
+            }
+
+    response {
+                error_code 0 : integer
+                new_name 1 : string #新昵称
+            }
+}
+
+
+#创建公会
+createGuild 8 {
+    request {
+                guild_name 0 : string #公会名称
+                guild_brief 1 : string #公会宣言
+            }
+
+    response {
+                error_code 0 : integer
+            }
+
+}
+
+#公会信息
+.guild_info{
+    guild_id 0 : integer
+    guild_name 1 : string
+    guild_brief 2 : string
+    guild_level 3 : integer
+}
+
+#获得公会列表
+getGuildList 9 {
+    request {
+                
+            }
+
+    response {
+                error_code 0 : integer
+                info_list 1 : *guild_info #公会列表信息
+            }
+}
+
+#加入公会
+joinGuild 10 {
+    request {
+                guild_id 0 : integer
+            }
+    
+    response {
+                error_code 0 : integer
+            }
+}
+
+#修改公会名字和宣言
+changeGuildDesc 11 {
+    request {
+                guild_name 0 : string #公会名称
+                guild_brief 1 : string #公会宣言
+            }
+    
+    response {
+                error_code 0 : integer
+                guild_name 1 : string #公会名称
+                guild_brief 2 : string #公会宣言
+            }
+}

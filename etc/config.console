@@ -1,0 +1,19 @@
+thread = 8
+harbor = 0
+start = "console_main"
+bootstrap = "snlua bootstrap"	-- The service for bootstrap
+luaservice = "../console/?.lua;../common/?.lua;./service/?.lua;"
+lualoader = "./lualib/loader.lua"
+
+-- 给 require 用
+lua_path = "./lualib/?.lua;./lualib/?/init.lua;../?.lua"
+lua_cpath = "./luaclib/?.so"
+
+nodename = "console"
+
+-- C 服务（比如 logger.so）
+cpath = "./cservice/?.so"
+
+
+--daemon = "../log/console/console.pid"
+--logger = "../log/console/console_core.log"

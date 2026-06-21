@@ -1,0 +1,29 @@
+thread = 8
+harbor = 0
+start = "serverMgr_main"
+bootstrap = "snlua bootstrap"	-- The service for bootstrap
+luaservice = "../serverMgr/?.lua;./service/?.lua;../common/?.lua"
+lualoader = "./lualib/loader.lua"
+
+-- 给 require 用
+lua_path = "./lualib/?.lua;./lualib/?/init.lua;../?.lua"
+lua_cpath = "./luaclib/?.so"
+
+
+-- C 服务（比如 logger.so）
+cpath = "./cservice/?.so"
+
+-- 集群
+nodename = "serverMgr"
+cluster = "../etc/clustername.serverMgr_1_1"
+server_id = 1
+proc_id = 1
+
+-- 日志
+daemon = "../log/serverMgr/serverMgr.pid"
+logger = "../log/serverMgr/serverMgr.log"
+logger_level = "INFO"
+
+debug_console = 9011
+
+

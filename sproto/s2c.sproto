@@ -1,0 +1,51 @@
+.package {
+	type 0 : integer
+	session 1 : integer
+}
+
+kick_user 1 {
+    request {
+        
+    }
+    
+    response {
+        
+    }
+}
+
+
+.role_info {
+    role_id 0 : integer
+    name 1 : string
+    sex 2 : integer
+}
+
+#同步角色列表
+update_role_list 2 {
+    request {
+        sel_role 0 : integer #当前选中的角色
+        role_list 1 : *role_info #玩家角色列表
+    }
+
+    response {
+
+    }
+}
+
+.guild_info{
+    guild_id 0 : integer
+    guild_name 1 : string
+    guild_brief 2 : string
+    guild_level 3 : integer
+}
+
+#同步帮会信息
+update_guild_info 3 {
+    request {
+        info 0 : guild_info # 单个帮会信息
+    }
+
+    response {
+
+    }
+}
