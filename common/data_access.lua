@@ -14,6 +14,7 @@ local TABLE_MAP = {
     role_data = DBDef.Table.role.role_data,
     role_guild = DBDef.Table.role.role_guild,
     bag_slots = DBDef.Table.role.bag_slots,
+    bag = DBDef.Table.role.bag,
 }
 
 local function is_multi_row(table_def)
@@ -443,6 +444,10 @@ function M.collect_player_row_keys(player_data, role_base, role_data)
         if guild_key then
             table.insert(keys, guild_key)
         end
+        local bag_key = M.build_row_key("bag", { parentDBID = role_data.parentDBID })
+        if bag_key then
+            table.insert(keys, bag_key)
+        end
         local slot_keys = M.collect_bag_slot_row_keys(role_data.parentDBID)
         for _, slot_key in ipairs(slot_keys) do
             table.insert(keys, slot_key)
@@ -491,6 +496,7 @@ function M.build_row_keys_for_evict(server_id, act_id, player_data)
             add(M.build_row_key("role_base", { dbid = dbid }))
             add(M.build_row_key("role_data", { parentDBID = dbid }))
             add(M.build_row_key("role_guild", { parentDBID = dbid }))
+            add(M.build_row_key("bag", { parentDBID = dbid }))
             for _, slot_key in ipairs(M.collect_bag_slot_row_keys(dbid)) do
                 add(slot_key)
             end

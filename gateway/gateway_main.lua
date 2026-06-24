@@ -5,6 +5,8 @@ local cluster = require "skynet.cluster"
 local logger = require "common.logger"
 local debug_console = require "common.debug_console_ex"
 local util = require "common.util"
+local proc_state = require "common.proc_state"
+local graceful_stop = require "common.graceful_stop"
 
 
 skynet.init(function()
@@ -27,13 +29,14 @@ skynet.start(function()
 	skynet.uniqueservice("config_mgr")
 	-- 启动消息处理服务，用于统一处理本进程与其他进程服务消息
 	skynet.uniqueservice("service/handle_message")
+	graceful_stop.start_listener()
 	-- 启动协议加载服务
 	skynet.uniqueservice("protoloader")
-	
-	
+
 	-- 打开当前节点的集群功能，允许其他集群节点与本节点通信
     local cluster_name = nodename .. "_" .. server_id .. "_" .. proc_id
 	cluster.open(cluster_name)
+	proc_state.report(0)
 
     -- 获取网关服务的端口和最大客户端数
 	local port = tonumber(skynet.getenv("gateway_port"))
@@ -49,6 +52,7 @@ skynet.start(function()
 
 	debug_console.start()
 	skynet.register(".gateway_main")
+	proc_state.running()
 	logger.info("Gateway server started")
 
 	

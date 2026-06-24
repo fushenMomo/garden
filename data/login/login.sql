@@ -39,3 +39,38 @@ CREATE TABLE server_list (
 `paygm_name` CHAR(32) NOT NULL DEFAULT ''
 
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+/**************************** 
+ ** 进程状态监控
+ ****************************/
+DROP TABLE IF EXISTS `server_proc_state`;
+
+CREATE TABLE `server_proc_state` (
+`group_id` INT UNSIGNED NOT NULL DEFAULT 0,              /* 服务器组 */
+`proc_type` INT UNSIGNED NOT NULL DEFAULT 0,             /* 进程类型 */
+`proc_id` INT UNSIGNED NOT NULL DEFAULT 0,               /* 进程ID */
+`proc_name` VARCHAR(16) NOT NULL DEFAULT '',             /* 进程名称 */
+`state` INT UNSIGNED NOT NULL DEFAULT 0,                 /* 进程状态 */
+`update_time` INT UNSIGNED NOT NULL DEFAULT 0,           /* 状态刷新时间 */
+
+PRIMARY KEY (`group_id`,`proc_type`,`proc_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+/**************************** 
+** 服务端报错
+****************************/
+DROP TABLE IF EXISTS server_traceback;
+
+CREATE TABLE server_traceback (
+`id` INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+`group_id` INT UNSIGNED NOT NULL DEFAULT 0,
+`hash_key` CHAR(32) NOT NULL,
+`traceback_log` TEXT,
+`frist_time` DATETIME NOT NULL DEFAULT '1970-01-01 00:00:00',   /* 首次记录时间 */
+`last_time` DATETIME NOT NULL DEFAULT '1970-01-01 00:00:00',    /* 最后记录时间 */
+`trace_times` INT UNSIGNED NOT NULL DEFAULT 0,
+`fixed` TINYINT UNSIGNED NOT NULL DEFAULT 0,
+
+INDEX `idx_group_key` (`group_id`,`hash_key`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

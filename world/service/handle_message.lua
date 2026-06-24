@@ -6,6 +6,7 @@ local sharedata = require "skynet.sharedata"
 local logger = require "common.logger"
 local snutil = require "common.snutil"
 local util = require "common.util"
+local graceful_stop = require "common.graceful_stop"
 
 local _SERVER_ID = nil
 local _PROC_ID = nil
@@ -106,6 +107,21 @@ function CMD.notify_world_6am_update()
     end
 end
 
+function CMD.graceful_stop()
+    logger.info("world graceful_stop begin, agent_count=%s", _AGENT_COUNT)
+    local agents = {}
+    for _, agent in pairs(_AGENT_LIST) do
+        agents[#agents + 1] = agent
+    end
+    for _, agent in ipairs(agents) do
+        pcall(skynet.call, agent, "lua", "disconnect")
+    end
+    _AGENT_LIST = {}
+    _ACC_ENTITY_MAP = {}
+    _AGENT_COUNT = 0
+    return graceful_stop.finish()
+end
+
 --@server_id
 --@proc_id world服的进程ID
 --@load_value 当前world服在线人数
@@ -151,8 +167,8 @@ skynet.init(function()
 end)
 
 skynet.start(function()
-	skynet.dispatch("lua", function(session, _, cmd, ...)
-		snutil.lua_docmd(session, CMD, cmd, ...)
+	skynet.dispatch("lua", function(session, source, cmd, ...)
+		snutil.xpcall_docmd(session, source, CMD, cmd, ...)
 	end)
 
     _SERVER_ID = skynet.getenv("server_id")

@@ -234,16 +234,24 @@ skynet.init(function()
 end)
 
 skynet.start(function()
-	skynet.dispatch("lua", function(session, _, cmd, ...)
-        if CMD[cmd] then
-            snutil.lua_docmd(session, CMD, cmd, ...)
-        else
-            for _, mod in ipairs(_MODULE_LIST) do
-                if mod.CMD and mod.CMD[cmd] then
-                    snutil.lua_docmd(session, mod.CMD, cmd, ...)
-                    break
+	skynet.dispatch("lua", function(session, source, cmd, ...)
+        local args = {...}
+        local ok, err = xpcall(function()
+            if CMD[cmd] then
+                snutil.lua_docmd(session, CMD, cmd, table.unpack(args))
+            else
+                for _, mod in ipairs(_MODULE_LIST) do
+                    if mod.CMD and mod.CMD[cmd] then
+                        snutil.lua_docmd(session, mod.CMD, cmd, table.unpack(args))
+                        return
+                    end
                 end
             end
+        end, snutil.handle_err)
+        if not ok then
+            logger.info(string.format("%s error, cmd=%s, session=%s, source=%s, args=%s",
+                SERVICE_NAME, cmd, session, source, tostring(args)))
+            error(err)
         end
 	end)
 

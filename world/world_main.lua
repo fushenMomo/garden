@@ -4,6 +4,8 @@ require "skynet.manager"
 local cluster = require "skynet.cluster"
 local logger = require "common.logger"
 local debug_console = require "common.debug_console_ex"
+local proc_state = require "common.proc_state"
+local graceful_stop = require "common.graceful_stop"
 
 skynet.init(function()
 	logger.info("world server initialized")
@@ -88,11 +90,13 @@ skynet.start(function()
 
 	-- 启动配置管理服务，用于管理配置文件
 	skynet.uniqueservice("config_mgr")
+	proc_state.report(0)
 
 	init_db_mysql()
 	init_db_redis()
 
 	skynet.uniqueservice("service/handle_message")
+	graceful_stop.start_listener()
 
 	-- 可持久化定时器（Redis ZSET + 启动恢复）
 	skynet.uniqueservice("service/timer_service")
@@ -101,5 +105,6 @@ skynet.start(function()
 
 	debug_console.start()
 	skynet.register(".world_main")
+	proc_state.running()
 	logger.info("World server started")
 end)

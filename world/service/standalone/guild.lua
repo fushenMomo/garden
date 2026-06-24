@@ -45,8 +45,8 @@ local function load_guild_member()
     end
     if result and next(result) then
         for _, guild_member in ipairs(result) do
-            _GUILD_MEMBER_MAP[guild_member.role_dbid] = guild_member
-            _GUILD_MEMBER_ROLE_DBID_2_INDEX[guild_member.role_dbid] = guild_member.index
+            _GUILD_MEMBER_MAP[tonumber(guild_member.role_dbid)] = guild_member
+            _GUILD_MEMBER_ROLE_DBID_2_INDEX[tonumber(guild_member.role_dbid)] = guild_member.index
             if _MAX_MEMBER_INDEX < guild_member.index then
                 _MAX_MEMBER_INDEX = guild_member.index
             end
@@ -126,13 +126,15 @@ function CMD.login_guild(msg)
     logger.info("guild_%s login_guild, msg=%s", _GUILD_ID, util.serialize(msg))
     local role_dbid = tonumber(msg.role_dbid)
     if not role_dbid then
-        logger.error("login_guild failed, role_dbid=%s", role_dbid)
+        logger.error("login_guild failed333, role_dbid=%s", role_dbid)
         return false
     end
     if not _GUILD_MEMBER_MAP[role_dbid] then
-        logger.error("login_guild failed, role_dbid=%s not in guild_%s", role_dbid, _GUILD_ID)
+        logger.error("login_guild failed444, role_dbid=%s not in guild_%s", role_dbid, _GUILD_ID)
         return false
     end
+
+    logger.info("role_dbid, _GUILD_MEMBER_MAP[role_dbid]: %s, %s", role_dbid, util.serialize(_GUILD_MEMBER_MAP[role_dbid]))
 
     _GUILD_MEMBER_MAP[role_dbid].logout_time = 0 -- 修改成在线状态
     local ok = skynet.call(".db_global", "lua", "update_by_conditions", "guild_member", {
@@ -142,7 +144,11 @@ function CMD.login_guild(msg)
         logout_time = 0,
     })
     if not ok then
-        logger.error("login_guild failed, guild_id=%s, role_dbid=%s", _GUILD_ID, role_dbid)
+        -- 检查原因建议：打印条件和guild_member_map调试信息
+        logger.error("login_guild failed, guild_id=%s, role_dbid=%s, map=%s, index=%s", 
+            _GUILD_ID, role_dbid, util and util.serialize and util.serialize(_GUILD_MEMBER_MAP[role_dbid]) or "nil", 
+            _GUILD_MEMBER_MAP[role_dbid] and _GUILD_MEMBER_MAP[role_dbid].index or "nil"
+        )
         return false
     end
 
@@ -161,12 +167,13 @@ function CMD.logout_guild(msg)
         return false
     end
 
-    _GUILD_MEMBER_MAP[role_dbid].logout_time = os.time() -- 修改成离线状态
+    local cur_time = os.time()
+    _GUILD_MEMBER_MAP[role_dbid].logout_time = cur_time -- 修改成离线状态
     local ok = skynet.call(".db_global", "lua", "update_by_conditions", "guild_member", {
         guild_id = _GUILD_ID,
         index = _GUILD_MEMBER_MAP[role_dbid].index,
     }, {
-        logout_time = _GUILD_MEMBER_MAP[role_dbid].logout_time,
+        logout_time = cur_time,
     })
     if not ok then
         logger.error("logout_guild failed, guild_id=%s, role_dbid=%s", _GUILD_ID, role_dbid)
@@ -248,8 +255,8 @@ skynet.init(function()
 end)
 
 skynet.start(function()
-	skynet.dispatch("lua", function(session, _, cmd, ...)
-		snutil.lua_docmd(session, CMD, cmd, ...)
+	skynet.dispatch("lua", function(session, source, cmd, ...)
+		snutil.xpcall_docmd(session, source, CMD, cmd, ...)
 	end)
 
 	logger.info("guild started")

@@ -26,6 +26,11 @@ function CMD.get_server_info_list()
     return _SERVER_INFO_LIST
 end
 
+function CMD.get_server_info(server_id)
+    load_server_info_list()
+    return _SERVER_INFO_LIST[tonumber(server_id)]
+end
+
 
 skynet.init(function()
     const = sharedata.query "const"
@@ -34,8 +39,8 @@ end)
 
 
 skynet.start(function()
-    skynet.dispatch("lua", function(session, _, cmd, ...)
-		snutil.lua_docmd(session, CMD, cmd, ...)
+    skynet.dispatch("lua", function(session, source, cmd, ...)
+		snutil.xpcall_docmd(session, source, CMD, cmd, ...)
 	end)
 
     --load_server_info_list()

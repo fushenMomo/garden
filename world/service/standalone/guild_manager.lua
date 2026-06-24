@@ -35,14 +35,14 @@ function CMD.login_guild(msg)
     logger.info("guild_manager login_guild, msg=%s", util.serialize(msg))
     local guild_id = tonumber(msg.guildID)
     local role_dbid = tonumber(msg.roleDBID)
-    if not guild_id or not role_dbid then
-        logger.error("login_guild failed, guild_id=%s, role_dbid=%s", guild_id, role_dbid)
+    if (not guild_id) or (not role_dbid) then
+        logger.error("login_guild111 failed, guild_id=%s, role_dbid=%s", guild_id, role_dbid)
         return false
     end
 
     local guild_agent = _GUILD_AGENT_LIST[guild_id]
     if not guild_agent then
-        logger.error("login_guild failed, guild_id=%s, role_dbid=%s", guild_id, role_dbid)
+        logger.error("login_guild222 failed, guild_id=%s, role_dbid=%s", guild_id, role_dbid)
         return false
     end
     local ret = skynet.call(guild_agent, "lua", "login_guild", {
@@ -223,8 +223,8 @@ skynet.init(function()
 end)
 
 skynet.start(function()
-	skynet.dispatch("lua", function(session, _, cmd, ...)
-		snutil.lua_docmd(session, CMD, cmd, ...)
+	skynet.dispatch("lua", function(session, source, cmd, ...)
+		snutil.xpcall_docmd(session, source, CMD, cmd, ...)
 	end)
 
     load_guild_list()

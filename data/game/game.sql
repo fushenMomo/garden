@@ -73,6 +73,17 @@ PRIMARY KEY (`parent_dbid`, `item_index`)
 
 
 /**************************** 
+ ** 不占格背包
+ ****************************/
+DROP TABLE IF EXISTS `bag`;
+
+CREATE TABLE `bag` (
+`parent_dbid` INT UNSIGNED NOT NULL PRIMARY KEY,
+`item_list` TEXT
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+/**************************** 
  ** 联盟个人数据
  ****************************/
 DROP TABLE IF EXISTS `role_guild`;

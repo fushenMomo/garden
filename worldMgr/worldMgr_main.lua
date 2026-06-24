@@ -4,6 +4,8 @@ require "skynet.manager"
 local cluster = require "skynet.cluster"
 local logger = require "common.logger"
 local debug_console = require "common.debug_console_ex"
+local proc_state = require "common.proc_state"
+local graceful_stop = require "common.graceful_stop"
 
 local function init_db_mysql()
 	local db_name = string.format(skynet.getenv("DB_GAME_NAME"), tostring(skynet.getenv("server_id")))
@@ -75,8 +77,10 @@ skynet.start(function()
 
 	-- 启动配置管理服务，用于管理配置文件
 	skynet.uniqueservice("config_mgr")
+	proc_state.report(0)
 	-- 启动消息处理服务，用于统一处理本进程与其他进程服务消息
 	skynet.uniqueservice("service/handle_message")
+	graceful_stop.start_listener()
 
 	init_db_mysql()
 	init_db_redis()
@@ -91,6 +95,7 @@ skynet.start(function()
 	
 	debug_console.start()
 	skynet.register(".worldMgr_main")
+	proc_state.running()
 	logger.info("WorldMgr server started")
 
 end)

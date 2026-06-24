@@ -1,4 +1,5 @@
 local skynet = require "skynet"
+local trace_log = require "common.trace_log"
 
 local logger = {}
 local _LOG_SERVICE -- 日志服务地址
@@ -43,15 +44,26 @@ local function get_log_service()
     return _LOG_SERVICE
 end
 
-local function write_log(level, ...)
+local function check_level(level)
     local level_value = _LOG_LEVEL_DICT[level] or 1
     local base_level_value = _LOG_LEVEL_DICT[skynet.getenv("logger_level") or "INFO"] or 1
-    if level_value < base_level_value then
+    return level_value >= base_level_value
+end
+
+local function write_log(level, ...)
+    if not check_level(level) then
         return
     end
     local svc = get_log_service()
     local message = format_message(...)
     return skynet.call(svc, "lua", "write_log", level, message)
+end
+
+local function push_trace_log(level, ...)
+    if not check_level(level) then
+        return
+    end
+    trace_log.push(level, format_message(...))
 end
 
 --@opt: 日志配置选项
@@ -70,11 +82,11 @@ function logger.debug(...)
 end
 
 function logger.warn(...)
-    return write_log("WARN", ...)
+    return push_trace_log("WARN", ...)
 end
 
 function logger.error(...)
-    return write_log("ERROR", ...)
+    return push_trace_log("ERROR", ...)
 end
 
 return logger

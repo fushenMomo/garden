@@ -16,6 +16,8 @@ end
 
 local reload_list = {
     ["const"] = "../common/const.lua",
+    ["sensitive_words"] = "../common/sensitive_words.lua",
+    ["cfg_item"] = "../config/cfg_item.lua",
 }
 
 function CMD.reloadall()

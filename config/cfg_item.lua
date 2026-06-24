@@ -1,4 +1,4 @@
-cfg_item = {
+local cfg_item = {
     [1] = { ID = 1, name = "金币", alias = "money", type = 4, subType = 1, rank = 4 },
     [2] = { ID = 2, name = "魔晶石", alias = "ingot", type = 4, subType = 1, rank = 5 },
     [3] = { ID = 3, name = "以太晶体", type = 4, subType = 1, rank = 5 },
@@ -1896,3 +1896,5 @@ cfg_item = {
     [1030604] = { ID = 1030604, name = "异世界铜锣烧", type = 1, subType = 3, rank = 6, levelLimit = 1, useValue = "affection", useDetailValue = 100 },
     [1030605] = { ID = 1030605, name = "火鸡宴", type = 1, subType = 3, rank = 6, levelLimit = 1, useValue = "affection", useDetailValue = 100 },
   }
+
+  return cfg_item

@@ -19,7 +19,9 @@ local PRINT_FLAG = ">"
 local IS_BUSY = false
 local IS_CONNECTING_FD = nil
 local _READPACKAGE = nil
+local _RECV_LAST = ""
 local _SESSION = 0
+local _WAIT_RESPONSE = {}
 
 local CMD = {}
 local reconnect
@@ -213,6 +215,30 @@ function CMD.changeGuildDesc(req_data)
     return IS_CONNECTING_FD, req, session
 end
 
+function CMD.gainItem(req_data)
+    if not IS_CONNECTING_FD then
+        return nil, "not_connected"
+    end
+    local session = next_session()
+    local req = _REQUEST("gainItem", {
+        item_id = req_data[1],
+        item_count = req_data[2],
+    }, session)
+    return IS_CONNECTING_FD, req, session
+end
+
+function CMD.costItem(req_data)
+    if not IS_CONNECTING_FD then
+        return nil, "not_connected"
+    end
+    local session = next_session()
+    local req = _REQUEST("costItem", {
+        item_id = req_data[1],
+        item_count = req_data[2],
+    }, session)
+    return IS_CONNECTING_FD, req, session
+end
+
 skynet.init(function()
 	logger.info("Console server initialized")
 end)
@@ -311,6 +337,7 @@ reconnect = function(host, port)
         return nil, "connect_failed"
     end
     _READPACKAGE = unpack_f(IS_CONNECTING_FD, unpack_packet)
+    _RECV_LAST = ""
     return IS_CONNECTING_FD
 end
 
@@ -335,54 +362,113 @@ local function reset_connection_state()
     PRINT_FLAG = ">"
     IS_CONNECTING_FD = nil
     _READPACKAGE = nil
+    _RECV_LAST = ""
+    for _, entry in pairs(_WAIT_RESPONSE) do
+        if not entry.result then
+            entry.err = "connection closed"
+        end
+        skynet.wakeup(entry.co)
+    end
+    _WAIT_RESPONSE = {}
+end
+
+local function try_read_one_package()
+    if not IS_CONNECTING_FD then
+        return nil
+    end
+    local result
+    result, _RECV_LAST = unpack_packet(_RECV_LAST)
+    if result then
+        return result
+    end
+    local r = socket.recv(IS_CONNECTING_FD)
+    if not r then
+        return nil
+    end
+    if r == "" then
+        error("server closed")
+    end
+    result, _RECV_LAST = unpack_packet(_RECV_LAST .. r)
+    return result
 end
 
 local function dispatch_server_packet(pack)
     return _HOST:dispatch(pack)
 end
 
-local function recv_until_response(expected_session)
+local function flush_prompt()
+    io.write(PRINT_FLAG)
+    io.stdout:flush()
+end
+
+local function handle_server_push(name, args, response)
+    print("<---- push request:", name)
+    if args and type(args) == "table" then
+        print("    " .. util.serialize(args))
+    end
+    if type(response) == "function" then
+        pcall(response)
+    end
+    if name == "kick_user" then
+        print("server kick current user, connection closed.")
+        for _, entry in pairs(_WAIT_RESPONSE) do
+            entry.result = {
+                session = nil,
+                args = { kicked = true },
+            }
+        end
+        reset_connection_state()
+    end
+end
+
+local function wait_response(expected_session, send_fn)
+    local co = coroutine.running()
+    local entry = { co = co }
+    _WAIT_RESPONSE[expected_session] = entry
+    if send_fn then
+        send_fn()
+    end
+    skynet.wait(co)
+    _WAIT_RESPONSE[expected_session] = nil
+    if entry.err then
+        return nil, entry.err
+    end
+    return entry.result
+end
+
+local function recv_loop()
     while true do
-        local ok_recv, pack = pcall(_READPACKAGE)
-        if not ok_recv then
-            return nil, "recv failed: " .. tostring(pack)
-        end
-
-        local ok_dispatch, t, a, b, c = pcall(dispatch_server_packet, pack)
-        print("ok_dispatch:", ok_dispatch, t, a, b, c)
-        if not ok_dispatch then
-            return nil, "dispatch failed: " .. tostring(t)
-        end
-
-        if t == "REQUEST" then
-            local name, args, response = a, b, c
-            print("<---- push request:", name)
-            if args and type(args) == "table" then
-                print("    " .. util.serialize(args))
-            end
-            if type(response) == "function" then
-                pcall(response)
-            end
-            if name == "kick_user" then
-                print("server kick current user, connection closed.")
-                reset_connection_state()
-                return {
-                    session = nil,
-                    args = {
-                        kicked = true,
-                    },
-                }
-            end
-        elseif t == "RESPONSE" then
-            local session, args = a, b
-            if expected_session == nil or expected_session == session then
-                return {
-                    session = session,
-                    args = args,
-                }
-            end
+        if not IS_CONNECTING_FD then
+            skynet.sleep(10)
         else
-            return nil, "unknown package type: " .. tostring(t)
+            local ok_recv, pack = pcall(try_read_one_package)
+            if not ok_recv then
+                reset_connection_state()
+            elseif pack then
+                local ok_dispatch, t, a, b, c = pcall(dispatch_server_packet, pack)
+                if ok_dispatch then
+                    if t == "REQUEST" then
+                        handle_server_push(a, b, c)
+                        flush_prompt()
+                    elseif t == "RESPONSE" then
+                        local session, args = a, b
+                        local entry = _WAIT_RESPONSE[session]
+                        if entry then
+                            entry.result = { session = session, args = args }
+                            skynet.wakeup(entry.co)
+                        else
+                            print("<---- response session:", session)
+                            if args and type(args) == "table" then
+                                print("    " .. util.serialize(args))
+                            end
+                            flush_prompt()
+                        end
+                    end
+                end
+                skynet.yield()
+            else
+                skynet.sleep(1)
+            end
         end
     end
 end
@@ -409,9 +495,9 @@ local function console_main_loop()
                     if fd then
                         PRINT_FLAG = ">>"
                         if req then
-                            send_packet(fd, req)
-
-                            local resp, recv_err = recv_until_response(expected_session)
+                            local resp, recv_err = wait_response(expected_session, function()
+                                send_packet(fd, req)
+                            end)
                             if not resp then
                                 print(recv_err)
                                 break
@@ -465,6 +551,7 @@ skynet.start(function()
 		end
 	end)
 
+    skynet.fork(recv_loop)
     skynet.timeout(10, function()
         skynet.fork(console_main_loop)
     end)

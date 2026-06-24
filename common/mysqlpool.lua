@@ -155,7 +155,7 @@ function CMD.delete_by_conditions(tablename, conditions)
     for key, value in pairs(conditions) do
         -- 处理每个条件，防止SQL注入
         local quoted_value = mysql.quote_sql_str(tostring(value))
-        table.insert(where_parts, string.format("%s = %s", key, quoted_value))
+        table.insert(where_parts, string.format("`%s` = %s", key, quoted_value))
     end
 
     local where_clause = table.concat(where_parts, " AND ")
@@ -226,13 +226,13 @@ function CMD.update_by_conditions(tablename, conditions, row)
     local where_parts = {}
     for k, v in pairs(conditions) do
         local quoted_value = mysql.quote_sql_str(tostring(v))
-        table.insert(where_parts, string.format("%s = %s", k, quoted_value))
+        table.insert(where_parts, string.format("`%s` = %s", k, quoted_value))
     end
     local where_clause = table.concat(where_parts, " and ")
 
     local sql = string.format("update %s set %s where %s;", tablename, set_clause, where_clause)
 
-    --logger.info("[update_by_conditions]:%s", sql)
+    logger.info("[update_by_conditions]:%s", sql)
 
     local ret, result = CMD.execute(sql)
     return ret

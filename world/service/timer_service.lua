@@ -253,8 +253,8 @@ skynet.start(function()
     -- 哈希表
     _DATA_KEY = string.format(const.redis_key.timer_data, _SERVER_ID, _PROC_ID)
 
-    skynet.dispatch("lua", function(session, _, cmd, ...)
-        snutil.lua_docmd(session, CMD, cmd, ...)
+    skynet.dispatch("lua", function(session, source, cmd, ...)
+        snutil.xpcall_docmd(session, source, CMD, cmd, ...)
     end)
 
     skynet.fork(function()

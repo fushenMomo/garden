@@ -45,6 +45,11 @@ const.error_code = {
     not_in_guild = 5007, -- 尚未加入公会
     change_guild_desc_failed = 5008, -- 修改公会描述失败
     not_guild_ownner = 5009, -- 不是公会会长
+
+    -- 背包相关功能
+    item_not_found = 6001, -- 物品不存在
+    add_item_failed = 6002, -- 添加物品失败
+    sub_item_failed = 6003, -- 扣除物品失败
 }
 
 const.cache_ttl = {
@@ -80,6 +85,8 @@ const.redis_key = {
     -- 定时器（按 server_id + proc_id 隔离，每个 world 进程独立队列）
     timer_queue = "timer:queue:%s:%s",  -- server_id, proc_id
     timer_data = "timer:data:%s:%s",    -- server_id, proc_id
+
+    bi_queue = "bi:queue:%s",           -- server_id
 }
 
 const.timer = {
@@ -133,6 +140,29 @@ const.heartbeat_timeout = 60 -- 心跳超时时间，60秒
 const.guild_standing = {
     member = 0, -- 成员
     ownner = 1, -- 会长
+}
+
+const.proc_type = {
+    login = 1,
+    gateway = 2,
+    world = 3,
+    worldMgr = 4,
+    serverMgr = 5,
+    bi = 6,
+    webAPI = 7,
+}
+
+const.proc_state = {
+    init = 0,
+    running = 1,
+    closed = 2,
+}
+
+-- 进程状态监控相关配置
+const.proc_state_monitor = {
+    heartbeat_interval = 3000,  -- 心跳包间隔时间，单位：毫秒
+    stale_timeout = 90,         -- 状态过期时间，单位：秒
+    scan_interval = 6000,       -- 状态扫描间隔，单位：毫秒
 }
 
 return const

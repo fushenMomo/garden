@@ -17,23 +17,26 @@ ports:
     gateway_base: 8889         # gateway_{sid}_{pid} => base + 前序组gateway总数 + (pid - 1)
 
 global:
-  login: {}
-  serverMgr:
-    server_id: 1
-    proc_id: 1
+  login:
+    redis_port: 8001
+  serverMgr: {}
 
 groups:
   - id: 1
     gateway_count: 2
     world_count: 2
-    redis_port: 6379
+    redis_port: 8002
   - id: 2
     gateway_count: 2
     world_count: 2
-    redis_port: 8000
+    redis_port: 8003
+  - id: 3
+    gateway_count: 2
+    world_count: 2
+    redis_port: 8004
 
 startup_order:
-  - serverMgr_1_1
+  - serverMgr
   - login
   - webAPI
   - gateway_1_1
@@ -46,6 +49,12 @@ startup_order:
   - worldMgr_2_1
   - world_2_1
   - world_2_2
+  - gateway_3_1
+  - gateway_3_2
+  - worldMgr_3_1
+  - bi_3_1
+  - world_3_1
+  - world_3_2
 
 skynet:
   thread: 8

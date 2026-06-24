@@ -4,6 +4,8 @@ local cluster = require "skynet.cluster"
 
 local logger = require "common.logger"
 local snutil = require "common.snutil"
+local util = require "common.util"
+local graceful_stop = require "common.graceful_stop"
 local modules = require "webAPI.service.module.init"
 
 local CMD = {}
@@ -19,7 +21,7 @@ function CMD.web_notify(module, action, data)
 end
 
 function CMD.call_servermgr(cmd, ...)
-	local ok, ret = pcall(cluster.call, "serverMgr_1_1", ".handle_message", cmd, ...)
+	local ok, ret = pcall(cluster.call, "serverMgr", ".handle_message", cmd, ...)
 	if not ok then
 		logger.error("call_servermgr failed, cmd=%s err=%s", tostring(cmd), tostring(ret))
 		return nil
@@ -50,9 +52,23 @@ function CMD.call_world(server_id, proc_id, cmd, ...)
 	return ret
 end
 
+function CMD.get_proc_state(group_id)
+	local ok, ret = pcall(cluster.call, "serverMgr", ".proc_state_service", "query", group_id)
+	if not ok then
+		logger.error("get_proc_state failed, group_id=%s err=%s", tostring(group_id), tostring(ret))
+		return nil
+	end
+	return ret
+end
+
+function CMD.graceful_stop()
+	logger.info("webAPI graceful_stop begin")
+	return graceful_stop.finish()
+end
+
 skynet.start(function()
-	skynet.dispatch("lua", function(session, _, cmd, ...)
-		snutil.lua_docmd(session, CMD, cmd, ...)
+	skynet.dispatch("lua", function(session, source, cmd, ...)
+		snutil.xpcall_docmd(session, source, CMD, cmd, ...)
 	end)
 	skynet.register(".handle_message")
 	logger.info("webAPI handle_message started")

@@ -95,6 +95,7 @@ function M.insert_role_base(act_id, server_id)
 
     data_access.insert("role_data", { parent_dbid = dbid })
     data_access.insert("role_guild", { parent_dbid = dbid })
+    data_access.insert("bag", { parentDBID = dbid, itemList = {} })
     return dbid
 end
 

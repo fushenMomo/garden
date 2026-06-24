@@ -102,6 +102,17 @@ function CMD.close(fd)
 	close_agent(fd)
 end
 
+function CMD.graceful_stop()
+	local fds = {}
+	for fd in pairs(_AGENT_BY_FD) do
+		fds[#fds + 1] = fd
+	end
+	for _, fd in ipairs(fds) do
+		pcall(close_agent, fd)
+	end
+	return true
+end
+
 local function get_client_count()
 	local client_count = 0
 	for _, agent in pairs(_AGENT_BY_FD) do

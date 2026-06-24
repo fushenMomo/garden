@@ -5,6 +5,7 @@ local cluster = require "skynet.cluster"
 local logger = require "common.logger"
 local snutil = require "common.snutil"
 local util = require "common.util"
+local graceful_stop = require "common.graceful_stop"
 
 local CMD = {}
 
@@ -255,9 +256,18 @@ function CMD.debug_dump()
 	return util.serialize(_WORLD_LOADING)
 end
 
+function CMD.graceful_stop()
+    logger.info("worldMgr graceful_stop begin")
+    local data_sync = skynet.localname(".data_sync")
+    if data_sync then
+        pcall(skynet.call, data_sync, "lua", "flush_all")
+    end
+    return graceful_stop.finish()
+end
+
 skynet.start(function()
-	skynet.dispatch("lua", function(session, _, cmd, ...)
-		snutil.lua_docmd(session, CMD, cmd, ...)
+	skynet.dispatch("lua", function(session, source, cmd, ...)
+		snutil.xpcall_docmd(session, source, CMD, cmd, ...)
 	end)
 
 	_SERVER_ID = skynet.getenv("server_id")

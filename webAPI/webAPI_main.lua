@@ -3,7 +3,8 @@ require "skynet.manager"
 
 local cluster = require "skynet.cluster"
 local logger = require "common.logger"
---local debug_console = require "common.debug_console_ex"
+local proc_state = require "common.proc_state"
+local graceful_stop = require "common.graceful_stop"
 
 skynet.start(function()
 	logger.init({base_dir = "../log/webAPI"})
@@ -11,6 +12,7 @@ skynet.start(function()
 
 	skynet.uniqueservice("config_mgr")
 	skynet.uniqueservice("service/handle_message")
+	graceful_stop.start_listener()
 
 	local nodename = skynet.getenv("nodename") or "webAPI"
 	cluster.open(nodename)
@@ -29,5 +31,7 @@ skynet.start(function()
 
 	--debug_console.start()
 	skynet.register(".webAPI_main")
+	proc_state.report(0)
+	proc_state.running()
 	logger.info("webAPI server started, port=%s protocol=%s", port, protocol)
 end)

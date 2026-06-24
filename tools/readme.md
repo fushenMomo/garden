@@ -15,5 +15,5 @@ mysql -h 192.168.178.129 -u yaofan -p123456 sk_s1_game < tools/merge_server_veri
 mysql -h 192.168.178.129 -u yaofan -p123456 sk_s1_global < tools/merge_server_verify_global.sql
 
 # 6. 收尾
-redis-cli -h 192.168.178.129 -a r12345 -p 6379 -n 1 FLUSHDB
+redis-cli -h 192.168.178.129 -a r12345 -p 8002 -n 1 FLUSHDB
 # topology.yaml 注释掉 id:2 的 groups，重新 gen_config，只启 1 服进程

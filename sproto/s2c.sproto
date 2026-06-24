@@ -49,3 +49,21 @@ update_guild_info 3 {
 
     }
 }
+
+
+#物品信息
+.item_info {
+    item_id 0 : integer
+    item_count 1 : integer
+}
+
+#同步背包信息(不占格子)
+update_bag_item_list 4 {
+    request {
+        info_list 0 : *item_info #物品列表
+    }
+
+    response {
+
+    }
+}

@@ -17,6 +17,9 @@ end
 local CMD = {}
 
 function CMD.open(conf)
+    if conf.password and not conf.auth then
+        conf.auth = conf.password
+    end
     db = redis.connect(conf)
     skynet.fork(ping)
     skynet.register(conf.name or ("." .. conf.database))

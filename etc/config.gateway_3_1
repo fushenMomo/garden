@@ -1,0 +1,36 @@
+thread = 8
+harbor = 0
+start = "gateway_main"
+bootstrap = "snlua bootstrap"	-- The service for bootstrap
+luaservice = "../gateway/?.lua;../common/?.lua;./service/?.lua;"
+lualoader = "./lualib/loader.lua"
+
+-- 给 require 用
+lua_path = "./lualib/?.lua;./lualib/?/init.lua;../?.lua"
+lua_cpath = "./luaclib/?.so"
+
+
+-- C 服务（比如 logger.so）
+cpath = "./cservice/?.so"
+
+-- 集群
+nodename = "gateway"
+cluster = "../etc/clustername.gateway_3_1"
+server_id = 3
+proc_id = 1
+
+-- 日志
+daemon = "../log/gateway/gateway_3_1.pid"
+logger = "../log/gateway/gateway_core_3_1.log"
+logger_level = "INFO"
+
+debug_console = 9035
+
+-- 网关服 TCP
+gateway_port = 8893
+gateway_maxclient = 1024
+gateway_package_max = 8192
+
+
+
+

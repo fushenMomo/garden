@@ -5,6 +5,7 @@ local cluster = require "skynet.cluster"
 local logger = require "common.logger"
 local snutil = require "common.snutil"
 local util = require "common.util"
+local graceful_stop = require "common.graceful_stop"
 
 local _CUR_BEST_WORLD_PROC_ID = nil
 -- acc_id -> {token = token, expire = os.time() + 300}
@@ -71,10 +72,15 @@ function CMD.get_cur_open_world_proc()
 	return _CUR_BEST_WORLD_PROC_ID
 end
 
+function CMD.graceful_stop()
+	logger.info("gateway graceful_stop begin")
+	pcall(skynet.call, ".gateway_watchdog", "lua", "graceful_stop")
+	return graceful_stop.finish()
+end
 
 skynet.start(function()
-	skynet.dispatch("lua", function(session, _, cmd, ...)
-		snutil.lua_docmd(session, CMD, cmd, ...)
+	skynet.dispatch("lua", function(session, source, cmd, ...)
+		snutil.xpcall_docmd(session, source, CMD, cmd, ...)
 	end)
 
 	skynet.register(".handle_message")

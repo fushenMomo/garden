@@ -29,7 +29,7 @@ DBDef.roleShardExpand = {
 	sharding = 500 * 10000,              -- 每张表的数据容量阈值
 	expandThreshold = 10000,             -- 提前扩容的新表的预留阈值，可根据业务需求调整
 	primary = "role_base",               -- 主分表名
-	tables = { "role_base", "role_data", "role_guild" }, -- 需要同时分表的表
+	tables = { "role_base", "role_data", "role_guild", "bag" }, -- 需要同时分表的表
 }
 
 DBDef.Table = {
@@ -201,6 +201,32 @@ DBDef.Table = {
 				item_id = "itemID",
 			},
 		},
+
+		-------------------------------------------------------------------------
+		-- bag
+		-------------------------------------------------------------------------
+		bag = {
+			tableName = "bag",
+			field = {
+				"parent_dbid", "item_list", 
+			},
+			dataType = {
+				t.number, t.table, 
+			},
+			sharding = 500*10000,
+			shardKey = "parent_dbid",
+			queryKey = 1,
+			updateKey = {1},
+			redisKey = function(row)
+				return string.format("bag:%s", row.parent_dbid)
+			end,
+			updateIndex = 2,
+			limit = 1,
+			keyMap = {
+				parent_dbid = "parentDBID",
+				item_list = "itemList",
+			},
+		},
 		
 	}
 }
@@ -212,6 +238,7 @@ DBDef.redis_prefix_map = {
 	["rdata:"] = DBDef.Table.role.role_data,
 	["rguild:"] = DBDef.Table.role.role_guild,
 	["slots:"] = DBDef.Table.role.bag_slots,
+	["bag:"] = DBDef.Table.role.bag,
 }
 
 local function ensure_reverse_key_map(table_def)

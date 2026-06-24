@@ -4,6 +4,8 @@ require "skynet.manager"
 local cluster = require "skynet.cluster"
 local logger = require "common.logger"
 local debug_console = require "common.debug_console_ex"
+local proc_state = require "common.proc_state"
+local graceful_stop = require "common.graceful_stop"
 
 
 skynet.init(function()
@@ -34,6 +36,20 @@ local function init_db_mysql()
 	end
 end
 
+local function init_db_redis()
+	local redis_host = skynet.getenv("REDIS_HOST")
+	local redis_port = tonumber(skynet.getenv("REDIS_PORT"))
+	local redis_password = skynet.getenv("REDIS_PASSWORD")
+	local redis_db_index = tonumber(skynet.getenv("REDIS_DB_INDEX"))
+	if redis_host and redis_port and redis_password then
+		local redispool = skynet.newservice("redispool")
+		skynet.call(redispool, "lua", "open",
+			{name = ".redis", host = redis_host, port = redis_port, password = redis_password, db = redis_db_index})
+		logger.info("redispool started, host=%s port=%s", redis_host, tostring(redis_port))
+	else
+		logger.err("redispool start skipped: missing REDIS_* config")
+	end
+end
 
 skynet.start(function()
 	-- 初始化业务日志记录器
@@ -45,6 +61,7 @@ skynet.start(function()
 	skynet.uniqueservice("protoloader")
 	-- 启动消息处理服务，用于统一处理本进程与其他进程服务消息
 	skynet.uniqueservice("service/handle_message")
+	graceful_stop.start_listener()
 	
 	local nodename = skynet.getenv("nodename")
 	assert(nodename)
@@ -73,13 +90,14 @@ skynet.start(function()
 
 	-- 启动数据库代理服务 
 	init_db_mysql()
+	init_db_redis()
 
-	
-
+	proc_state.report(0)
 
 	debug_console.start()
 	-- 将当前服务注册为 ".login" 名字，方便外部通过名字查找和通信
 	skynet.register(".login_main")
+	proc_state.running()
 	logger.info("Login server started")
 	logger.info(string.format("login tcp listening on %s (maxclient=%s)", tostring(port), tostring(maxclient)))
 end)

@@ -24,10 +24,10 @@ function CMD.start(conf)
 end
 
 skynet.start(function()
-	skynet.dispatch("lua", function(_, _, cmd, ...)
+	skynet.dispatch("lua", function(session, _, cmd, ...)
 		local f = CMD[cmd]
 		if f then
-			f(...)
+			skynet.ret(skynet.pack(f(...)))
 		end
 	end)
 end)

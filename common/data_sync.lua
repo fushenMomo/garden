@@ -9,8 +9,10 @@ local util = require "common.util"
 
 local FLUSH_INTERVAL = 100 * 5 -- 1s
 local MAX_COUNT = 100
+local FLUSH_ALL_MAX = 10000
 
 local CMD = {}
+local _stopping = false
 
 
 function CMD.flush_row(element)
@@ -37,6 +39,22 @@ function CMD.flush_row(element)
     return true
 end
 
+function CMD.flush_all()
+    _stopping = true
+    local flushed = 0
+    for _ = 1, FLUSH_ALL_MAX do
+        local element = row_cache.pop_dirty_row_key()
+        if not element then
+            break
+        end
+        if CMD.flush_row(element) then
+            flushed = flushed + 1
+        end
+    end
+    logger.info("data_sync flush_all done, flushed=%s, remaining=%s",
+        flushed, row_cache.get_dirty_queue_len())
+    return row_cache.get_dirty_queue_len() == 0
+end
 
 local function backup()
     local nlen = row_cache.get_dirty_queue_len()
@@ -63,14 +81,16 @@ end
 
 local function flush_loop()
     while true do
-        backup()
+        if not _stopping then
+            backup()
+        end
         skynet.sleep(FLUSH_INTERVAL)
     end
 end
 
 skynet.start(function()
-    skynet.dispatch("lua", function(session, _, cmd, ...)
-        snutil.lua_docmd(session, CMD, cmd, ...)
+    skynet.dispatch("lua", function(session, source, cmd, ...)
+        snutil.xpcall_docmd(session, source, CMD, cmd, ...)
     end)
     skynet.fork(flush_loop)
     skynet.register(".data_sync")

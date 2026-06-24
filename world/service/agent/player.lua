@@ -2,6 +2,8 @@ local logger = require "common.logger"
 local snutil = require "common.snutil"
 local util = require "common.util"
 local data_access = require "common.data_access"
+local bi_log = require "common.bi_log"
+local skynet = require "skynet"
 
 local const = require "common.const"
 
@@ -49,6 +51,7 @@ local function create_role()
 
     data_access.insert("role_data", { parentDBID = dbid })
     data_access.insert("role_guild", { parentDBID = dbid })
+    data_access.insert("bag", { parentDBID = dbid, itemList = {} })
     _PLAYER_DATA.selectRole = dbid
     _PLAYER_DATA.role1 = dbid
     data_access.save("player_data", _PLAYER_DATA)
@@ -75,6 +78,7 @@ local function load_role()
         logger.error("load_role_base failed, role_id=%s", dbid)
         return
     end
+    --logger.error("load_role_test, role_id:%s", dbid)
     _ROLE_DATA = data_access.load("role_data", { parentDBID = _ROLE_BASE.dbid })
     if not _ROLE_DATA then
         local ok = data_access.insert("role_data", { parentDBID = _ROLE_BASE.dbid })
@@ -116,6 +120,14 @@ local function load_data()
         create_role()
     else
         load_role()
+    end
+
+    if _ROLE_BASE then
+        bi_log.push(_GLOBAL._SERVER_ID, {
+            event = "player_login",
+            act_id = _GLOBAL._ACC_ID,
+            role_id = _ROLE_BASE.dbid,
+        })
     end
 
 end
@@ -185,6 +197,9 @@ function M.close()
     logger.info("player close")
     if _PLAYER_DATA then
         _PLAYER_DATA.online = 0
+        if not _PLAYER_DATA.onlineTime then
+            _PLAYER_DATA.onlineTime = 0
+        end
         _PLAYER_DATA.onlineTime = _PLAYER_DATA.onlineTime + (os.time() - _LOGIN_TIME)
         data_access.save("player_data", _PLAYER_DATA, {"online", "onlineTime"})
     end

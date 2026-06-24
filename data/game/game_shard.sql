@@ -58,6 +58,13 @@ CREATE TABLE `bag_slots_1` (
 PRIMARY KEY (`parent_dbid`, `item_index`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+DROP TABLE IF EXISTS `bag_1`;
+
+CREATE TABLE `bag_1` (
+`parent_dbid` INT UNSIGNED NOT NULL PRIMARY KEY,
+`item_list` TEXT
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 DROP TABLE IF EXISTS `role_guild_1`;
 CREATE TABLE `role_guild_1` (
 `parent_dbid` INT UNSIGNED NOT NULL PRIMARY KEY,
