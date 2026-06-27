@@ -1,8 +1,8 @@
 local skynet = require "skynet"
 require "skynet.manager"
-local cluster = require "skynet.cluster"
 local logger = require "common.logger"
 local util = require "common.util"
+local cluster_login = require "common.cluster_login"
 
 local CMD = {}
 local SOCKET = {}
@@ -135,16 +135,15 @@ local function sync_gateway_port2login(server_id, proc_id, port, client_count)
 	proc_id = tonumber(proc_id)
 	port = tonumber(port)
 	client_count = tonumber(client_count)
-	local ret = cluster.call(
-								"login", 
-								".login_watchdog", 
-								"sync_gateway_port", 
-								server_id, 
-								proc_id, 
-								port, 
-								client_count
-							)
-	return ret
+	cluster_login.broadcast(
+		".login_watchdog",
+		"sync_gateway_port",
+		server_id,
+		proc_id,
+		port,
+		client_count
+	)
+	return true
 end
 
 

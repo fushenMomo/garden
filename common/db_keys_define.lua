@@ -227,6 +227,84 @@ DBDef.Table = {
 				item_list = "itemList",
 			},
 		},
+
+		-------------------------------------------------------------------------
+		-- task
+		-------------------------------------------------------------------------
+		task = {
+			tableName = "task",
+			field = {
+				"parent_dbid", "task_index", "task_id", "data", "status", "time",
+			},
+			dataType = {
+				t.number, t.number, t.number, t.table, t.number, t.number,
+			},
+			sharding = 30*10000,
+			shardKey = "parent_dbid",
+			queryKey = 1,
+			updateKey = {1, 2},
+			redisKey = function(row)
+				return string.format("task:%s:%s", row.parent_dbid, row.task_index)
+			end,
+			updateIndex = 3,
+			limit = 500,
+			keyMap = {
+				parent_dbid = "parentDBID",
+				task_index = "taskIndex",
+				task_id = "taskID",
+			},
+		},
+
+		-------------------------------------------------------------------------
+		-- partner_list
+		-------------------------------------------------------------------------
+		partner_list = {
+			tableName = "partner_list",
+			field = {
+				"parent_dbid", "partner_index", "partner_id", "level", "grade",
+				"maxhp", "speed", "attack", "defense", "crit", "de_crit", "crit_dam", "de_crit_dam",
+				"acc", "miss", "incr_dam", "decr_dam", "cure", "be_cured", "control", "de_control",
+				"phy_dam", "de_phy_dam", "eng_dam", "de_eng_dam", "cure_crit", "fv",
+				"ext_buff", "lock", "skill_list", "chips",
+				"weapon1", "weapon2", "weapon3", "weapon4",
+			},
+			dataType = {
+				t.number, t.number, t.number, t.number, t.number,
+				t.number, t.number, t.number, t.number, t.number, t.number, t.number, t.number,
+				t.number, t.number, t.number, t.number, t.number, t.number, t.number, t.number,
+				t.number, t.number, t.number, t.number, t.number, t.number,
+				t.table, t.number, t.table, t.table,
+				t.number, t.number, t.number, t.number,
+			},
+			sharding = 30*10000,
+			shardKey = "parent_dbid",
+			queryKey = 1,
+			updateKey = {1, 2},
+			redisKey = function(row)
+				return string.format("partner:%s:%s", row.parent_dbid, row.partner_index)
+			end,
+			updateIndex = 3,
+			limit = 200,
+			keyMap = {
+				parent_dbid = "parentDBID",
+				partner_index = "partnerIndex",
+				partner_id = "partnerID",
+				de_crit = "deCrit",
+				crit_dam = "critDam",
+				de_crit_dam = "deCritDam",
+				incr_dam = "incrDam",
+				decr_dam = "decrDam",
+				be_cured = "beCured",
+				de_control = "deControl",
+				phy_dam = "phyDam",
+				de_phy_dam = "dePhyDam",
+				eng_dam = "engDam",
+				de_eng_dam = "deEngDam",
+				cure_crit = "cureCrit",
+				ext_buff = "extBuff",
+				skill_list = "skillList",
+			},
+		},
 		
 	}
 }
@@ -239,6 +317,8 @@ DBDef.redis_prefix_map = {
 	["rguild:"] = DBDef.Table.role.role_guild,
 	["slots:"] = DBDef.Table.role.bag_slots,
 	["bag:"] = DBDef.Table.role.bag,
+	["task:"] = DBDef.Table.role.task,
+	["partner:"] = DBDef.Table.role.partner_list,
 }
 
 local function ensure_reverse_key_map(table_def)

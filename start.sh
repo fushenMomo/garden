@@ -4,7 +4,8 @@ cd ./skynet
 
 SERVICES=(
     serverMgr
-    login
+    login_1
+    login_2
     webAPI
     gateway_1_1
     gateway_1_2

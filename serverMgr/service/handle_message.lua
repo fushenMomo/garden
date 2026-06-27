@@ -6,6 +6,7 @@ local logger = require "common.logger"
 local snutil = require "common.snutil"
 local util = require "common.util"
 local graceful_stop = require "common.graceful_stop"
+local cluster_login = require "common.cluster_login"
 
 local CMD = {}
 
@@ -19,15 +20,10 @@ end
 
 
 local function notify_login_online()
-	local ok, err = pcall(function()
-		cluster.send("login", ".handle_message", "sync_from_servermgr", {
-			event = "servermgr_online",
-			time = skynet.time(),
-		})
-	end)
-	if not ok then
-		logger.error("notify_login_online failed, err=%s", tostring(err))
-	end
+	cluster_login.broadcast(".handle_message", "sync_from_servermgr", {
+		event = "servermgr_online",
+		time = skynet.time(),
+	})
 end
 
 
@@ -58,6 +54,31 @@ function CMD.sync_from_worldmgr(msg)
 	_WORLDMGR_SYNC_INFO = msg or {}
 	_WORLDMGR_SYNC_INFO.sync_time = skynet.time()
 	return true
+end
+
+
+function CMD.relay_role_data_query(target_server_id, role_dbid, cmd, ...)
+	target_server_id = tonumber(target_server_id)
+	role_dbid = tonumber(role_dbid)
+
+	if not target_server_id or not role_dbid or not cmd then
+		return {}
+	end
+	local args = { ... }
+	local ok, ret = pcall(function()
+		return cluster.call(
+			get_worldmgr_cluster_name(target_server_id),
+			".role_data_transmit_mgr",
+			"query_role_data_local",
+			role_dbid, cmd, table.unpack(args)
+		)
+	end)
+	if not ok then
+		logger.error("relay_role_data_query failed, target_server_id=%s, role_dbid=%s, cmd=%s, err=%s",
+			target_server_id, role_dbid, cmd, tostring(ret))
+		return {}
+	end
+	return ret or {}
 end
 
 

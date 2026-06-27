@@ -5,19 +5,20 @@ bootstrap = "snlua bootstrap"	-- The service for bootstrap
 luaservice = "../serverMgr/?.lua;./service/?.lua;../common/?.lua"
 lualoader = "./lualib/loader.lua"
 
--- 给 require 用
+-- ? require ?
 lua_path = "./lualib/?.lua;./lualib/?/init.lua;../?.lua"
 lua_cpath = "./luaclib/?.so"
 
 
--- C 服务（比如 logger.so）
+-- C ????? logger.so?
 cpath = "./cservice/?.so"
 
--- 集群
+-- ??
 nodename = "serverMgr"
+login_count = 2
 cluster = "../etc/clustername.serverMgr"
 
--- 日志
+-- ??
 daemon = "../log/serverMgr/serverMgr.pid"
 logger = "../log/serverMgr/serverMgr.log"
 logger_level = "INFO"

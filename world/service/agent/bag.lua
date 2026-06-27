@@ -152,7 +152,7 @@ function M.sub_item(itemID, count)
     return true
 end
 
-function REQUEST:gainItem()
+function REQUEST:gain_item()
     local item_id = tonumber(self.item_id)
     local item_count = tonumber(self.item_count)
     if not item_id or not item_count or item_count <= 0 then
@@ -187,7 +187,7 @@ function REQUEST:gainItem()
 end
 
 
-function REQUEST:costItem()
+function REQUEST:cost_item()
     local item_id = self.item_id
     local item_count = self.item_count
     if not item_id or not item_count or item_count <= 0 then
@@ -217,6 +217,19 @@ function REQUEST:costItem()
     })
 
     return {error_code = const.error_code.success}
+end
+
+--@data_desc
+function M.showWorldAgentData(data_desc)
+    local data_map = {
+        ["bag"] = _BAG,
+        ["bag_slots"] = _BAG_SLOTS,
+    }
+    local data = data_map[data_desc]
+    if not data then
+        return "data not found"
+    end
+    return util.serialize(data)
 end
 
 return M

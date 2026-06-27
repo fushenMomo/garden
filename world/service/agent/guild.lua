@@ -132,7 +132,7 @@ end
 
 
 
-function REQUEST:createGuild()
+function REQUEST:create_guild()
     logger.info("guild createGuild")
     if _GUILD_DATA and _GUILD_DATA.guildID and _GUILD_DATA.guildID > 0 then
         return {error_code = const.error_code.already_in_guild}
@@ -177,7 +177,7 @@ function REQUEST:createGuild()
 end
 
 
-function REQUEST:getGuildList()
+function REQUEST:get_guild_list()
     logger.info("guild getGuildList")
     local dest_cluster_name = get_world_mgr_name()
     local ret, msg = cluster.call(
@@ -194,7 +194,7 @@ function REQUEST:getGuildList()
 end
 
 
-function REQUEST:changeGuildDesc()
+function REQUEST:change_guild_desc()
     logger.info("guild changeGuildDesc")
     if not (_GUILD_DATA and _GUILD_DATA.guildID and _GUILD_DATA.guildID > 0) then
         return {error_code = const.error_code.not_in_guild}
@@ -236,7 +236,7 @@ function REQUEST:changeGuildDesc()
     return {error_code = const.error_code.success, guild_name = guild_name, guild_brief = guild_brief}
 end
 
-function REQUEST:joinGuild()
+function REQUEST:join_guild()
     logger.info("guild joinGuild")
     if _GUILD_DATA and _GUILD_DATA.guildID and _GUILD_DATA.guildID > 0 then
         return {error_code = const.error_code.already_in_guild}
@@ -272,5 +272,16 @@ function REQUEST:joinGuild()
     return {error_code = const.error_code.success}
 end
 
+--@data_desc
+function M.showWorldAgentData(data_desc)
+    local data_map = {
+        ["role_guild"] = _GUILD_DATA,
+    }
+    local data = data_map[data_desc]
+    if not data then
+        return "data not found"
+    end
+    return util.serialize(data)
+end
 
 return M

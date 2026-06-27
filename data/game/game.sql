@@ -95,3 +95,68 @@ CREATE TABLE `role_guild` (
 `guild_title` TINYINT UNSIGNED NOT NULL DEFAULT 0, /* 联盟头衔 */
 `last_guild_id` INT UNSIGNED NOT NULL DEFAULT 0	/* 上一次加入的联盟ID */
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+/**************************** 
+ ** 任务数据
+ ****************************/
+DROP TABLE IF EXISTS `task`;
+
+CREATE TABLE `task` (
+`parent_dbid` INT UNSIGNED NOT NULL,						
+`task_index` INT UNSIGNED NOT NULL DEFAULT 0,			/* 任务数据序号 */
+`task_id` INT UNSIGNED NOT NULL,							/* 任务id */
+`data` TEXT, 												/* 任务数据 */
+`status` TINYINT UNSIGNED NOT NULL DEFAULT 0,				/* 任务状态 */
+`time` INT UNSIGNED NOT NULL DEFAULT 0,                     /* 接任务时间 */
+
+PRIMARY KEY (`parent_dbid`, `task_index`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+/**************************** 
+ ** 侠客列表
+ ****************************/
+DROP TABLE IF EXISTS `partner_list`;
+
+CREATE TABLE `partner_list` (
+`parent_dbid` INT UNSIGNED NOT NULL DEFAULT 0,              /* 玩家dbid */
+`partner_index` SMALLINT UNSIGNED NOT NULL DEFAULT 0,       /* 伙伴格子索引 */
+`partner_id` INT UNSIGNED NOT NULL DEFAULT 0,               /* 伙伴id */
+`level` SMALLINT UNSIGNED NOT NULL DEFAULT 0,               /* 等级 */
+`grade` INT UNSIGNED NOT NULL DEFAULT 0,                    /* 品阶 */
+`maxhp` BIGINT UNSIGNED NOT NULL DEFAULT 0,                 /* 生命 */
+`speed` INT UNSIGNED NOT NULL DEFAULT 0,                    /* 速度 */
+`attack` INT UNSIGNED NOT NULL DEFAULT 0,                   /* 攻击 */
+`defense` INT UNSIGNED NOT NULL DEFAULT 0,                  /* 防御 */
+`crit` INT UNSIGNED NOT NULL DEFAULT 0,                     /* 暴击 */
+`de_crit` INT UNSIGNED NOT NULL DEFAULT 0,                  /* 抗暴 */
+`crit_dam` INT UNSIGNED NOT NULL DEFAULT 0,                 /* 暴伤 */
+`de_crit_dam` INT UNSIGNED NOT NULL DEFAULT 0,              /* 韧性 */
+`acc` INT UNSIGNED NOT NULL DEFAULT 0,                      /* 命中 */
+`miss` INT UNSIGNED NOT NULL DEFAULT 0,                     /* 闪避 */
+`incr_dam` INT UNSIGNED NOT NULL DEFAULT 0,                 /* 增伤 */
+`decr_dam` INT UNSIGNED NOT NULL DEFAULT 0,                 /* 免伤 */
+`cure` INT UNSIGNED NOT NULL DEFAULT 0,                     /* 治疗 */
+`be_cured` INT UNSIGNED NOT NULL DEFAULT 0,                 /* 受疗 */
+`control` INT UNSIGNED NOT NULL DEFAULT 0,                  /* 控制 */
+`de_control` INT UNSIGNED NOT NULL DEFAULT 0,               /* 扛控 */
+`phy_dam` INT UNSIGNED NOT NULL DEFAULT 0,                  /* 物伤 */
+`de_phy_dam` INT UNSIGNED NOT NULL DEFAULT 0,               /* 物免 */
+`eng_dam` INT UNSIGNED NOT NULL DEFAULT 0,                  /* 高伤 */
+`de_eng_dam` INT UNSIGNED NOT NULL DEFAULT 0,               /* 高免 */
+`cure_crit` INT UNSIGNED NOT NULL DEFAULT 0,                /* 治疗暴击 */
+`fv` INT UNSIGNED NOT NULL DEFAULT 0,                       /* 战斗力 */
+`ext_buff` TEXT,                                            /* 扩展buff列表 */
+`lock` TINYINT UNSIGNED NOT NULL DEFAULT 0,                 /* 锁状态 */
+`skill_list` TEXT,                                          /* 技能列表 */
+`chips` TEXT,                                               /* 芯片 */
+`weapon1` INT UNSIGNED NOT NULL DEFAULT 0,                  /* 装备 */
+`weapon2` INT UNSIGNED NOT NULL DEFAULT 0,                  /* 装备 */
+`weapon3` INT UNSIGNED NOT NULL DEFAULT 0,                  /* 装备 */
+`weapon4` INT UNSIGNED NOT NULL DEFAULT 0,                  /* 装备 */
+
+PRIMARY KEY (`parent_dbid`, `partner_index`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+

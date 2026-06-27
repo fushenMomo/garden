@@ -67,3 +67,83 @@ update_bag_item_list 4 {
 
     }
 }
+
+.task_info {
+    task_index 0 : integer
+    task_id 1 : integer
+    status 2 : integer
+    time 3 : integer
+    cur_value 4 : integer
+    dest_value 5 : integer
+}
+
+#同步任务列表
+update_task_list 5 {
+    request {
+        info_list 0 : *task_info
+    }
+
+    response {
+
+    }
+}
+
+.partner_info {
+    partner_index 0 : integer
+    partner_id 1 : integer
+    level 2 : integer
+    grade 3 : integer
+    maxhp 4 : integer
+    speed 5 : integer
+    attack 6 : integer
+    defense 7 : integer
+    crit 8 : integer
+    de_crit 9 : integer
+    crit_dam 10 : integer
+    de_crit_dam 11 : integer
+    acc 12 : integer
+    miss 13 : integer
+    incr_dam 14 : integer
+    decr_dam 15 : integer
+    cure 16 : integer
+    be_cured 17 : integer
+    control 18 : integer
+    de_control 19 : integer
+    phy_dam 20 : integer
+    de_phy_dam 21 : integer
+    eng_dam 22 : integer
+    de_eng_dam 23 : integer
+    cure_crit 24 : integer
+    fv 25 : integer
+    lock 26 : integer
+    weapon1 27 : integer
+    weapon2 28 : integer
+    weapon3 29 : integer
+    weapon4 30 : integer
+    ext_buff 31 : string
+    skill_list 32 : *integer
+    chips 33 : string
+}
+
+#同步伙伴列表
+update_partner_list 6 {
+    request {
+        info_list 0 : *partner_info
+    }
+
+    response {
+
+    }
+}
+
+
+#同步WorldAgent玩家数据信息
+update_world_agent_data_info 7 {
+    request {
+        result 0 : string
+    }
+
+    response {
+
+    }
+}

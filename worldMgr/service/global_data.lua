@@ -84,6 +84,28 @@ local function ensure_bag_shards(max_dbid)
     end
 end
 
+local function ensure_task_shards(max_dbid)
+    if not max_dbid or max_dbid < DBDef.dbidBase then
+        return
+    end
+    local task_def = DBDef.Table.role.task
+    local max_suffix = DBDef.calc_table_suffix(task_def, max_dbid)
+    for i = DBDef.tableIndexBase, max_suffix do
+        create_shard_table("task", i, nil)
+    end
+end
+
+local function ensure_partner_list_shards(max_dbid)
+    if not max_dbid or max_dbid < DBDef.dbidBase then
+        return
+    end
+    local partner_def = DBDef.Table.role.partner_list
+    local max_suffix = DBDef.calc_table_suffix(partner_def, max_dbid)
+    for i = DBDef.tableIndexBase, max_suffix do
+        create_shard_table("partner_list", i, nil)
+    end
+end
+
 local function check_role_shard_expand()
     local idx = _role_table_index
     local table_name = string.format("%s_%s", ROLE_SHARD_EXPAND.primary, idx)
@@ -95,6 +117,8 @@ local function check_role_shard_expand()
     end
 
     ensure_bag_shards(max_dbid)
+    ensure_task_shards(max_dbid)
+    ensure_partner_list_shards(max_dbid)
 
     local limit_dbid = DBDef.dbidBase + idx * ROLE_SHARD_EXPAND.sharding - ROLE_SHARD_EXPAND.expandThreshold
     if max_dbid < limit_dbid then
@@ -117,7 +141,7 @@ end
 local function start_shard_monitor()
     skynet.fork(function()
         while true do
-            skynet.sleep(100 * 60 * 10)
+            skynet.sleep(100 * 60 * 60 * 10)
             local ok, err = pcall(check_role_shard_expand)
             if not ok then
                 logger.error("check_role_shard_expand failed, err=%s", tostring(err))

@@ -157,7 +157,7 @@ local function require_modules()
     end
 end
 
-function REQUEST:heartbeatGame()
+function REQUEST:heartbeat_game()
     logger.info("heartbeatGame request, entity_id=%s", _ENTITY_ID)
     _LAST_HEARTBEAT_TIME = os.time()
     return {
@@ -165,6 +165,29 @@ function REQUEST:heartbeatGame()
             server_time = _LAST_HEARTBEAT_TIME,
         }
 end
+
+function REQUEST:show_world_agent_data()
+    logger.info("showWorldAgentData request, entity_id=%s, data_desc=%s", _ENTITY_ID, data_desc)
+    local result = ""
+    local module_desc = self.module_desc
+    local data_desc = self.data_desc
+    local mod_sort = const.world_agent_module_sort[module_desc]
+    if not mod_sort then
+        return { error_code = const.error_code.invalid_params }
+    end
+    local mod = _MODULE_LIST[mod_sort]
+    if not mod then
+        return { error_code = const.error_code.invalid_params }
+    end
+    
+    result = mod.showWorldAgentData(data_desc)
+    push_client("update_world_agent_data_info", {
+        result = result,
+    })
+
+    return { error_code = const.error_code.success }
+end
+
 
 function CMD.client_request(name, args)
     local f = REQUEST[name]
@@ -226,6 +249,7 @@ skynet.init(function()
 
     _GLOABL._ACC_ID = _ACC_ID
     _GLOABL._GATEWAY_PROC_ID = _GATEWAY_PROC_ID
+    _GLOABL._ENTITY_ID = _ENTITY_ID
     _GLOABL._SERVER_ID = _SERVER_ID
     _GLOABL.push_client = push_client
 

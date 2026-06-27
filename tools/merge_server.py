@@ -27,7 +27,7 @@ BAG_SHARDING = 30 * 10000
 PLAYER_SHARDING = 500 * 10000
 ROLE_SLOTS = ("role_1", "role_2", "role_3", "role_4")
 ROLE_TABLES = ("role_base", "role_data", "role_guild")
-GAME_SHARD_BASES = ("player_data", "role_base", "role_data", "role_guild", "bag_slots")
+GAME_SHARD_BASES = ("player_data", "role_base", "role_data", "role_guild", "bag_slots", "task", "partner_list")
 
 
 def calc_suffix(sharding, shard_key, id_base):
@@ -200,7 +200,8 @@ class MergeContext(object):
 
     def ensure_shards_for_dbid(self, conn, dbid):
         for base, sharding in (("role_base", ROLE_SHARDING), ("role_data", ROLE_SHARDING),
-                               ("role_guild", ROLE_SHARDING), ("bag_slots", BAG_SHARDING)):
+                               ("role_guild", ROLE_SHARDING), ("bag_slots", BAG_SHARDING),
+                               ("task", BAG_SHARDING), ("partner_list", BAG_SHARDING)):
             sfx = calc_suffix(sharding, dbid, DBID_BASE)
             self.ensure_shard(conn, base, sfx)
 
@@ -380,6 +381,68 @@ class MergeContext(object):
                 if not self.dry_run:
                     self.execute(tgt, sql)
                 self.inc("bag_slots")
+
+    def migrate_task(self):
+        src = self.game_db(self.source)
+        tgt = self.game_db(self.target)
+        for tbl in self.list_shard_tables(src, "task"):
+            sql = "SELECT * FROM {0}".format(qident(tbl))
+            for row in self.execute(src, sql):
+                old = int(row["parent_dbid"])
+                if old not in self.dbid_map:
+                    continue
+                new = self.dbid_map[old]
+                tgt_tbl = shard_table("task", calc_suffix(BAG_SHARDING, new, DBID_BASE))
+                sql = (
+                    "INSERT INTO {0} "
+                    "(parent_dbid,task_index,task_id,data,status,time) VALUES ("
+                    "{1},{2},{3},{4},{5},{6})"
+                ).format(
+                    qident(tgt_tbl), new, row["task_index"], row["task_id"],
+                    esc(row.get("data")), row["status"], row["time"])
+                if not self.dry_run:
+                    self.execute(tgt, sql)
+                self.inc("task")
+
+    def migrate_partner_list(self):
+        src = self.game_db(self.source)
+        tgt = self.game_db(self.target)
+        for tbl in self.list_shard_tables(src, "partner_list"):
+            sql = "SELECT * FROM {0}".format(qident(tbl))
+            for row in self.execute(src, sql):
+                old = int(row["parent_dbid"])
+                if old not in self.dbid_map:
+                    continue
+                new = self.dbid_map[old]
+                tgt_tbl = shard_table("partner_list", calc_suffix(BAG_SHARDING, new, DBID_BASE))
+                sql = (
+                    "INSERT INTO {0} "
+                    "(parent_dbid,partner_index,partner_id,level,grade,"
+                    "maxhp,speed,attack,defense,crit,de_crit,crit_dam,de_crit_dam,"
+                    "acc,miss,incr_dam,decr_dam,cure,be_cured,control,de_control,"
+                    "phy_dam,de_phy_dam,eng_dam,de_eng_dam,cure_crit,fv,"
+                    "ext_buff,lock,skill_list,chips,"
+                    "weapon1,weapon2,weapon3,weapon4) VALUES ("
+                    "{1},{2},{3},{4},{5},"
+                    "{6},{7},{8},{9},{10},{11},{12},{13},"
+                    "{14},{15},{16},{17},{18},{19},{20},{21},"
+                    "{22},{23},{24},{25},{26},{27},"
+                    "{28},{29},{30},{31},"
+                    "{32},{33},{34},{35})"
+                ).format(
+                    qident(tgt_tbl), new, row["partner_index"], row["partner_id"],
+                    row["level"], row["grade"], row["maxhp"], row["speed"],
+                    row["attack"], row["defense"], row["crit"], row["de_crit"],
+                    row["crit_dam"], row["de_crit_dam"], row["acc"], row["miss"],
+                    row["incr_dam"], row["decr_dam"], row["cure"], row["be_cured"],
+                    row["control"], row["de_control"], row["phy_dam"], row["de_phy_dam"],
+                    row["eng_dam"], row["de_eng_dam"], row["cure_crit"], row["fv"],
+                    esc(row.get("ext_buff")), row["lock"], esc(row.get("skill_list")),
+                    esc(row.get("chips")), row["weapon1"], row["weapon2"],
+                    row["weapon3"], row["weapon4"])
+                if not self.dry_run:
+                    self.execute(tgt, sql)
+                self.inc("partner_list")
 
     def find_player(self, conn, server_id, act_id):
         sfx = calc_suffix(PLAYER_SHARDING, act_id, ACT_BASE)
@@ -605,6 +668,8 @@ class MergeContext(object):
         self.migrate_role_data()
         self.migrate_role_guild()
         self.migrate_bag_slots()
+        self.migrate_task()
+        self.migrate_partner_list()
         self.migrate_player_data()
         self.migrate_guild_data()
         self.migrate_guild_member()

@@ -11,6 +11,7 @@ local sprotoloader = require "sprotoloader"
 
 local sharedata = require "skynet.sharedata"
 local const = nil
+local _CLIENT_HEARTBEAT_INTERVAL_TIME = 15 -- 15秒
 
 local _HOST = nil
 local _REQUEST = nil
@@ -113,7 +114,7 @@ function CMD.login(req_data)
     return fd, req, session
 end
 
-function CMD.selectServer(req_data)
+function CMD.select_server(req_data)
     if not IS_CONNECTING_FD then
         return nil, "not_connected"
     end
@@ -124,14 +125,14 @@ function CMD.selectServer(req_data)
     
     local server_id = req_data[1]
     local session = next_session()
-    local req = _REQUEST("selectServer", {
+    local req = _REQUEST("select_server", {
         server_id = server_id,
     }, session)
 
     return IS_CONNECTING_FD, req, session
 end
 
-function CMD.joinGame(req_data)
+function CMD.join_game(req_data)
     if not IS_CONNECTING_FD then
         return nil, "not_connected"
     end
@@ -143,7 +144,7 @@ function CMD.joinGame(req_data)
     local acc_id = req_data[1]
     local token = req_data[2]
     local session = next_session()
-    local req = _REQUEST("joinGame", {
+    local req = _REQUEST("join_game", {
         acc_id = acc_id,
         token = token,
     }, session)
@@ -151,90 +152,152 @@ function CMD.joinGame(req_data)
     return IS_CONNECTING_FD, req, session
 end
 
-function CMD.heartbeatGame(req_data)
+function CMD.heartbeat_game(req_data)
     if not IS_CONNECTING_FD then
         return nil, "not_connected"
     end
     local session = next_session()
-    local req = _REQUEST("heartbeatGame", {}, session)
+    local req = _REQUEST("heartbeat_game", {}, session)
     return IS_CONNECTING_FD, req, session
 end
 
-function CMD.changeRoleName(req_data)
+function CMD.change_role_name(req_data)
     if not IS_CONNECTING_FD then
         return nil, "not_connected"
     end
     local session = next_session()
-    local req = _REQUEST("changeRoleName", {
+    local req = _REQUEST("change_role_name", {
         new_name = req_data[1],
     }, session)
     return IS_CONNECTING_FD, req, session
 end
 
-function CMD.createGuild(req_data)
+function CMD.create_guild(req_data)
     if not IS_CONNECTING_FD then
         return nil, "not_connected"
     end
     local session = next_session()
-    local req = _REQUEST("createGuild", {
+    local req = _REQUEST("create_guild", {
         guild_name = req_data[1],
         guild_brief = req_data[2],
     }, session)
     return IS_CONNECTING_FD, req, session
 end
 
-function CMD.getGuildList(req_data)
+function CMD.get_guild_list(req_data)
     if not IS_CONNECTING_FD then
         return nil, "not_connected"
     end
     local session = next_session()
-    local req = _REQUEST("getGuildList", {}, session)
+    local req = _REQUEST("get_guild_list", {}, session)
     return IS_CONNECTING_FD, req, session
 end
 
-function CMD.joinGuild(req_data)
+function CMD.join_guild(req_data)
     if not IS_CONNECTING_FD then
         return nil, "not_connected"
     end
     local session = next_session()
-    local req = _REQUEST("joinGuild", {
+    local req = _REQUEST("join_guild", {
         guild_id = req_data[1],
     }, session)
     return IS_CONNECTING_FD, req, session
 end
 
-function CMD.changeGuildDesc(req_data)
+function CMD.change_guild_desc(req_data)
     if not IS_CONNECTING_FD then
         return nil, "not_connected"
     end
     local session = next_session()
-    local req = _REQUEST("changeGuildDesc", {
+    local req = _REQUEST("change_guild_desc", {
         guild_name = req_data[1],
         guild_brief = req_data[2],
     }, session)
     return IS_CONNECTING_FD, req, session
 end
 
-function CMD.gainItem(req_data)
+function CMD.gain_item(req_data)
     if not IS_CONNECTING_FD then
         return nil, "not_connected"
     end
     local session = next_session()
-    local req = _REQUEST("gainItem", {
+    local req = _REQUEST("gain_item", {
         item_id = req_data[1],
         item_count = req_data[2],
     }, session)
     return IS_CONNECTING_FD, req, session
 end
 
-function CMD.costItem(req_data)
+function CMD.cost_item(req_data)
     if not IS_CONNECTING_FD then
         return nil, "not_connected"
     end
     local session = next_session()
-    local req = _REQUEST("costItem", {
+    local req = _REQUEST("cost_item", {
         item_id = req_data[1],
         item_count = req_data[2],
+    }, session)
+    return IS_CONNECTING_FD, req, session
+end
+
+function CMD.active_partner(req_data)
+    if not IS_CONNECTING_FD then
+        return nil, "not_connected"
+    end
+    local session = next_session()
+    local req = _REQUEST("active_partner", {
+        partner_id = req_data[1],
+    }, session)
+    return IS_CONNECTING_FD, req, session
+end
+
+function CMD.receive_task_reward(req_data)
+    if not IS_CONNECTING_FD then
+        return nil, "not_connected"
+    end
+    local session = next_session()
+    local req = _REQUEST("receive_task_reward", {
+        task_index = req_data[1],
+    }, session)
+    return IS_CONNECTING_FD, req, session
+end
+
+function CMD.show_world_agent_data(req_data)
+    if not IS_CONNECTING_FD then
+        return nil, "not_connected"
+    end
+    if (not req_data) or (#req_data < 2) then
+        return nil, "invalid_request"
+    end
+    local session = next_session()
+    local req = _REQUEST("show_world_agent_data", {
+        module_desc = req_data[1],
+        data_desc = req_data[2],
+    }, session)
+    return IS_CONNECTING_FD, req, session
+end
+
+function CMD.start_fight(req_data)
+    if not IS_CONNECTING_FD then
+        return nil, "not_connected"
+    end
+    local session = next_session()
+    local req = _REQUEST("start_fight", {
+        fight_type = req_data[1],
+        server_id = req_data[2],
+        fight_dbid = req_data[3],
+    }, session)
+    return IS_CONNECTING_FD, req, session
+end
+
+function CMD.end_fight(req_data)
+    if not IS_CONNECTING_FD then
+        return nil, "not_connected"
+    end
+    local session = next_session()
+    local req = _REQUEST("end_fight", {
+        fight_type = req_data[1],
+        battle_id = req_data[2],
     }, session)
     return IS_CONNECTING_FD, req, session
 end
@@ -396,9 +459,54 @@ local function dispatch_server_packet(pack)
     return _HOST:dispatch(pack)
 end
 
-local function flush_prompt()
-    io.write(PRINT_FLAG)
+local _prompt_gen = 0
+
+local function cancel_deferred_prompt()
+    _prompt_gen = _prompt_gen + 1
+end
+
+local function write_prompt()
+    cancel_deferred_prompt()
+    io.write("\n" .. PRINT_FLAG)
     io.stdout:flush()
+end
+
+local function defer_prompt()
+    cancel_deferred_prompt()
+    local gen = _prompt_gen
+    skynet.timeout(5, function()
+        if gen == _prompt_gen then
+            io.write("\n" .. PRINT_FLAG)
+            io.stdout:flush()
+        end
+    end)
+end
+
+local function flush_prompt()
+    cancel_deferred_prompt()
+    io.write("\n" .. PRINT_FLAG)
+    io.stdout:flush()
+end
+
+local function show_history(max_n)
+    max_n = max_n or 20
+    local path = (os.getenv("HOME") or ".") .. "/.mirage_console_history"
+    local f = io.open(path, "r")
+    if not f then
+        print("no history: " .. path)
+        return
+    end
+    local lines = {}
+    for line in f:lines() do
+        if line ~= "" then
+            lines[#lines + 1] = line
+        end
+    end
+    f:close()
+    local start = math.max(1, #lines - max_n + 1)
+    for i = start, #lines do
+        print(string.format("%4d  %s", i, lines[i]))
+    end
 end
 
 local function handle_server_push(name, args, response)
@@ -476,24 +584,24 @@ end
 
 local function console_main_loop()
     print("...> Please input your command:")
-	io.write(PRINT_FLAG)
-	io.stdout:flush()
+    io.write(PRINT_FLAG)
+    io.stdout:flush()
     while true do
         if not IS_BUSY then
             IS_BUSY = true
 
             local cmd, rest = read_line()
             if IS_CONNECTING_FD and cmd == "quit" then
-                -- 断开连接
                 print("Bye.")
                 reset_connection_state()
-                io.write(PRINT_FLAG)
-                io.stdout:flush()
+                write_prompt()
+            elseif cmd == "history" then
+                show_history(tonumber(rest and rest[1]))
+                write_prompt()
             else
                 if cmd and CMD[cmd] then
                     local fd, req, expected_session = CMD[cmd](rest)
                     if fd then
-                        PRINT_FLAG = ">>"
                         if req then
                             local resp, recv_err = wait_response(expected_session, function()
                                 send_packet(fd, req)
@@ -507,14 +615,29 @@ local function console_main_loop()
                             if resp.args and type(resp.args) == "table" then
                                 print("    " .. util.serialize(resp.args))
                             end
+                            if cmd == "login" or cmd == "register" or cmd == "join_game" then
+                                if resp.args and resp.args.error_code == const.error_code.success then
+                                    PRINT_FLAG = ">>"
+                                else
+                                    PRINT_FLAG = ">"
+                                end
+                            else
+                                PRINT_FLAG = ">>"
+                            end
+                            defer_prompt()
+                        else
+                            if cmd == "connect" then
+                                PRINT_FLAG = ">>"
+                            end
+                            write_prompt()
                         end
                     else
                         print("error: ", req)
+                        write_prompt()
                     end
-                    io.write(PRINT_FLAG)
-	                io.stdout:flush()
                 elseif cmd then
                     print("Unknown command: " .. cmd)
+                    write_prompt()
                 end
                 
             end
@@ -545,9 +668,9 @@ skynet.start(function()
     skynet.fork(function()
 		while true do
             if IS_CONNECTING_FD then
-                send_packet(IS_CONNECTING_FD, _REQUEST "heartbeatGame")
+                send_packet(IS_CONNECTING_FD, _REQUEST "heartbeat_game")
             end
-			skynet.sleep(100 * 300)
+			skynet.sleep(100 * _CLIENT_HEARTBEAT_INTERVAL_TIME)
 		end
 	end)
 

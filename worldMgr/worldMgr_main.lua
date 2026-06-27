@@ -85,6 +85,8 @@ skynet.start(function()
 	init_db_mysql()
 	init_db_redis()
 
+	skynet.uniqueservice("service/role_data_transmit_mgr")
+
 	-- 启动数据同步服务
 	skynet.uniqueservice("data_sync")
 	-- 启动离线玩家行缓存淘汰服务

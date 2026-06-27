@@ -14,6 +14,7 @@ nodename = "bi"
 cluster = "../etc/clustername.bi_1_1"
 server_id = 1
 proc_id = 1
+login_count = 2
 
 daemon = "../log/bi/bi_1_1.pid"
 logger = "../log/bi/bi_1_1.log"

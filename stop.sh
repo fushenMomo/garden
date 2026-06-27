@@ -83,8 +83,8 @@ OTHER_LIST=(
     "skynet_bi_2_1:log/bi/bi_2_1.pid"
     "skynet_bi_3_1:log/bi/bi_3_1.pid"
     "skynet_webAPI:log/webAPI/webAPI.pid"
-    "skynet_serverMgr:log/serverMgr/serverMgr.pid"
     "skynet_login:log/login/login.pid"
+    "skynet_serverMgr:log/serverMgr/serverMgr.pid"
 )
 
 HAS_RUNNING=0

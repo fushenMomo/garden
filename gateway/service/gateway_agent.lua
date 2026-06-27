@@ -64,7 +64,7 @@ local function request(name, args, response)
 	return forward_to_world(name, args, response)
 end
 
-function REQUEST:joinGame()
+function REQUEST:join_game()
 	local acc_id = tonumber(self.acc_id)
 	local token = self.token
 	logger.info("joinGame request, acc_id=%s, token=%s", acc_id, token)
@@ -185,8 +185,7 @@ skynet.init(function ()
 end)
 
 local function generate_entity_id()
-	local entity_id = skynet.genid() + skynet.getenv("proc_id") * 1000000000
-	return entity_id
+	return skynet.self() + tonumber(skynet.getenv("proc_id")) * 1000000000
 end
 
 skynet.start(function()

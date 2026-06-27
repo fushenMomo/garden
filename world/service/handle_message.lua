@@ -13,6 +13,7 @@ local _PROC_ID = nil
 local _WORLD_MAXCLIENT = nil
 local _AGENT_LIST = {}
 local _ACC_ENTITY_MAP = {}
+local _ROLE_DBID_ENTITY_MAP = {}
 local _AGENT_COUNT = 0
 
 local const
@@ -36,9 +37,53 @@ local function remove_agent(entity_id)
         end
     end
     _AGENT_LIST[entity_id] = nil
+    for role_dbid, eid in pairs(_ROLE_DBID_ENTITY_MAP) do
+        if eid == entity_id then
+            _ROLE_DBID_ENTITY_MAP[role_dbid] = nil
+        end
+    end
     _AGENT_COUNT = math.max(0, _AGENT_COUNT - 1)
     skynet.send(agent, "lua", "disconnect")
     return true
+end
+
+function CMD.bind_role_entity(role_dbid, entity_id)
+    role_dbid = tonumber(role_dbid)
+    entity_id = tonumber(entity_id)
+    if not role_dbid or not entity_id then
+        return false
+    end
+    _ROLE_DBID_ENTITY_MAP[role_dbid] = entity_id
+    return true
+end
+
+function CMD.unbind_role_entity(role_dbid)
+    role_dbid = tonumber(role_dbid)
+    if not role_dbid then
+        return false
+    end
+    _ROLE_DBID_ENTITY_MAP[role_dbid] = nil
+    return true
+end
+
+function CMD.agent_cmd_by_role_dbid(role_dbid, cmd, ...)
+    role_dbid = tonumber(role_dbid)
+    if not role_dbid or not cmd then
+        return nil
+    end
+    local entity_id = _ROLE_DBID_ENTITY_MAP[role_dbid]
+    if not entity_id then
+        logger.error("agent_cmd_by_role_dbid entity not found, role_dbid=%s, cmd=%s", role_dbid, cmd)
+        return nil
+    end
+    local agent = _AGENT_LIST[entity_id]
+    if not agent then
+        logger.error("agent_cmd_by_role_dbid agent not found, role_dbid=%s, entity_id=%s, cmd=%s",
+            role_dbid, entity_id, cmd)
+        return nil
+    end
+    local args = {...}
+    return skynet.call(agent, "lua", cmd, table.unpack(args))
 end
 
 function CMD.account_login_world(msg)
@@ -118,6 +163,7 @@ function CMD.graceful_stop()
     end
     _AGENT_LIST = {}
     _ACC_ENTITY_MAP = {}
+    _ROLE_DBID_ENTITY_MAP = {}
     _AGENT_COUNT = 0
     return graceful_stop.finish()
 end

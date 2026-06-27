@@ -50,6 +50,20 @@ const.error_code = {
     item_not_found = 6001, -- 物品不存在
     add_item_failed = 6002, -- 添加物品失败
     sub_item_failed = 6003, -- 扣除物品失败
+
+    -- 伙伴相关功能
+    partner_not_found = 7001, -- 伙伴不存在
+    add_partner_failed = 7002, -- 添加伙伴失败
+
+    -- 任务相关功能
+    task_not_found = 8001, -- 任务不存在
+    task_not_completed = 8002, -- 任务未完成
+    task_reward_received = 8003, -- 任务奖励已领取
+    add_task_failed = 8004, -- 添加任务失败
+
+    -- 战斗相关功能
+    start_fight_failed = 9001, -- 发起战斗失败
+    end_fight_failed = 9002, -- 结束战斗失败
 }
 
 const.cache_ttl = {
@@ -75,6 +89,7 @@ const.redis_key = {
 
     -- 在线索引
     online = "online:%s:%s",        -- server_id, act_id
+    world_role = "world_role:%s:%s", -- server_id, dbid
 
     -- 玩家最后登录时间（有序集合，score=时间戳，member=act_id）
     last_login = "last_login:%s",   -- server_id
@@ -105,6 +120,25 @@ const.bag_slots = {
     max_count = 100, -- 背包格子最大数量
 }
 
+const.task = {
+    max_count = 500, -- 任务最大数量
+}
+
+const.task_status = {
+    going = 1, -- 进行中
+    completed = 2, -- 已经完成
+    received = 3, -- 已经领取奖励
+}
+
+const.task_accept_type = {
+    login = 1,
+    rename = 2,
+}
+
+const.task_complete_type = {
+    partner_count = 1,
+}
+
 -- world_agent的业务功能模块
 const.world_agent_module = {
     player = "player", -- 玩家数据
@@ -113,6 +147,8 @@ const.world_agent_module = {
     mail = "mail", -- 邮件数据
     friend = "friend", -- 好友数据
     guild = "guild", -- 公会数据
+    partner = "partner", -- 伙伴数据
+    fight = "fight", -- 战斗数据
 }
 
 const.world_agent_module_sort = {
@@ -122,6 +158,11 @@ const.world_agent_module_sort = {
     mail = 4,
     friend = 5,
     guild = 6,
+    partner = 7,
+    fight = 8,
+}
+const.partner = {
+    max_count = 200, --伙伴最大数量
 }
 
 const.item_type = {	-- 物品类型
@@ -135,7 +176,7 @@ const.item_type = {	-- 物品类型
     partner = 7, -- 特工
 }
 
-const.heartbeat_timeout = 60 -- 心跳超时时间，60秒
+const.heartbeat_timeout = 90 -- 心跳超时时间，90秒
 
 const.guild_standing = {
     member = 0, -- 成员
@@ -163,6 +204,12 @@ const.proc_state_monitor = {
     heartbeat_interval = 3000,  -- 心跳包间隔时间，单位：毫秒
     stale_timeout = 90,         -- 状态过期时间，单位：秒
     scan_interval = 6000,       -- 状态扫描间隔，单位：毫秒
+}
+
+
+const.fight_type = {
+    challenge = 1, -- 普通战斗
+
 }
 
 return const

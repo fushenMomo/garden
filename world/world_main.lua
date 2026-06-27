@@ -96,6 +96,9 @@ skynet.start(function()
 	init_db_redis()
 
 	skynet.uniqueservice("service/handle_message")
+	if not skynet.getenv("WORLD_FUNC_FLAG") then
+		skynet.uniqueservice("service/standalone/fighting_mgr")
+	end
 	graceful_stop.start_listener()
 
 	-- 可持久化定时器（Redis ZSET + 启动恢复）

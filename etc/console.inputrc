@@ -1,0 +1,4 @@
+"\e[A": previous-history
+"\e[B": next-history
+"\e[5~": previous-history
+"\e[6~": next-history

@@ -78,6 +78,10 @@ local function build_identity()
 
         proc_name = string.format("%s_%s_%s", nodename, server_id, proc_id)
 
+    elseif nodename == "login" then
+
+        proc_name = string.format("login_%s", proc_id)
+
     else
 
         proc_name = nodename

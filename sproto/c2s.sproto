@@ -56,7 +56,7 @@ heartbeat 3 {
 }
 
 #选择游戏服务器
-selectServer 4 {
+select_server 4 {
     request {
                 server_id 0 : integer #服务器ID
             }
@@ -72,7 +72,7 @@ selectServer 4 {
 ########################游戏服的协议###################################
 
 #进入游戏服务器
-joinGame 5 {
+join_game 5 {
     request {
                 acc_id 0 : integer #用户唯一id
                 token 1 : string #登录时获得的
@@ -83,8 +83,8 @@ joinGame 5 {
             }
 }
 
-#游戏服心跳（joinGame 之后由 gateway 转发到 world 处理）
-heartbeatGame 6 {
+#游戏服心跳（join_game 之后由 gateway 转发到 world 处理）
+heartbeat_game 6 {
     request {}
 
     response {
@@ -94,7 +94,7 @@ heartbeatGame 6 {
 }
 
 #修改角色昵称
-changeRoleName 7 {
+change_role_name 7 {
     request {
                 new_name 0 : string #新昵称
             }
@@ -107,7 +107,7 @@ changeRoleName 7 {
 
 
 #创建公会
-createGuild 8 {
+create_guild 8 {
     request {
                 guild_name 0 : string #公会名称
                 guild_brief 1 : string #公会宣言
@@ -128,7 +128,7 @@ createGuild 8 {
 }
 
 #获得公会列表
-getGuildList 9 {
+get_guild_list 9 {
     request {
                 
             }
@@ -140,7 +140,7 @@ getGuildList 9 {
 }
 
 #加入公会
-joinGuild 10 {
+join_guild 10 {
     request {
                 guild_id 0 : integer
             }
@@ -151,7 +151,7 @@ joinGuild 10 {
 }
 
 #修改公会名字和宣言
-changeGuildDesc 11 {
+change_guild_desc 11 {
     request {
                 guild_name 0 : string #公会名称
                 guild_brief 1 : string #公会宣言
@@ -165,7 +165,7 @@ changeGuildDesc 11 {
 }
 
 #获得物品(不占格子物品)
-gainItem 12 {
+gain_item 12 {
     request {
                 item_id 0 : integer
                 item_count 1 : integer
@@ -177,7 +177,7 @@ gainItem 12 {
 }
 
 #扣除物品(不占格子物品)
-costItem 13 {
+cost_item 13 {
     request {
                 item_id 0 : integer
                 item_count 1 : integer
@@ -187,3 +187,61 @@ costItem 13 {
                 error_code 0 : integer
             }
 }
+
+#激活侠客
+active_partner 14 {
+    request {
+                partner_id 0 : integer
+            }
+    response {
+                error_code 0 : integer
+            }
+}
+
+#领取任务奖励
+receive_task_reward 15 {
+    request {
+                task_index 0 : integer
+            }
+    response {
+                error_code 0 : integer
+            }
+}
+
+#展示worldAgent在线的数据
+show_world_agent_data 16 {
+    request {
+                module_desc 0 : string
+                data_desc 1 : string
+            }
+    response {
+                error_code 0 : integer
+            }
+}
+
+
+#发起战斗
+start_fight 17 {
+    request {
+                fight_type 0 : integer
+                server_id 1 : integer
+                fight_dbid 2 : integer
+            }
+    response {
+                error_code 0 : integer
+                battle_id 1 : integer #战斗标识ID
+            }
+}
+
+
+#结束战斗
+end_fight 18 {
+    request {
+                fight_type 0 : integer
+                battle_id 1 : integer
+            }
+    response {
+                error_code 0 : integer
+            }
+}
+

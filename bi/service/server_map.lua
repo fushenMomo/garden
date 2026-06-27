@@ -3,6 +3,7 @@ require "skynet.manager"
 local cluster = require "skynet.cluster"
 local logger = require "common.logger"
 local snutil = require "common.snutil"
+local cluster_login = require "common.cluster_login"
 
 local REFRESH_INTERVAL = 30000
 
@@ -22,7 +23,7 @@ local function apply_list(list)
 end
 
 local function refresh()
-    local ok, list = pcall(cluster.call, "login", ".server_list_service", "get_server_info_list")
+    local ok, list = cluster_login.call_any(".server_list_service", "get_server_info_list")
     if not ok then
         logger.error("server_map refresh failed, err=%s", tostring(list))
         return false
@@ -39,7 +40,7 @@ function CMD.get_group_id(server_id)
     if _MAP[server_id] then
         return _MAP[server_id]
     end
-    local ok, info = pcall(cluster.call, "login", ".server_list_service", "get_server_info", server_id)
+    local ok, info = cluster_login.call_any(".server_list_service", "get_server_info", server_id)
     if ok and info and info.group_id then
         _MAP[server_id] = tonumber(info.group_id)
         return _MAP[server_id]

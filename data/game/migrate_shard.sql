@@ -20,3 +20,5 @@ RENAME TABLE `role_base` TO `role_base_1`;
 RENAME TABLE `role_data` TO `role_data_1`;
 RENAME TABLE `bag_slots` TO `bag_slots_1`;
 RENAME TABLE `role_guild` TO `role_guild_1`;
+RENAME TABLE `task` TO `task_1`;
+RENAME TABLE `partner_list` TO `partner_list_1`;

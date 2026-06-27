@@ -18,6 +18,7 @@ local M = {}
 local CMD = {}
 local REQUEST = {}
 local _GLOBAL = nil
+local _task = require "world.service.agent.task"
 
 M.REQUEST = REQUEST
 M.CMD = CMD
@@ -132,7 +133,7 @@ local function load_data()
 
 end
 
-function REQUEST:changeRoleName()
+function REQUEST:change_role_name()
     local new_name = self.new_name
     if not new_name or new_name == "" then
         return { error_code = const.error_code.invalid_params }
@@ -143,6 +144,7 @@ function REQUEST:changeRoleName()
     _ROLE_BASE.name = new_name
     data_access.save("role_base", _ROLE_BASE, {"name"})
     logger.info("changeRoleName success, role_id=%s, new_name=%s", _ROLE_BASE.dbid, new_name)
+    _task.on_accept_event(const.task_accept_type.rename)
     return { error_code = const.error_code.success, new_name = new_name }
 end
 
@@ -160,7 +162,12 @@ end
 
 function M.load_complete()
     logger.info("player load_complete")
-
+    if _ROLE_BASE then
+        skynet.send(".handle_message", "lua", "bind_role_entity", M.get_role_base_dbid(), _GLOBAL._ENTITY_ID)
+        data_access.set_role_online(_GLOBAL._SERVER_ID, M.get_role_base_dbid())
+        logger.info("player load_complete, role_id=%s, cur_proc_id=%s", 
+        M.get_role_base_dbid(), data_access.is_role_online(_GLOBAL._SERVER_ID, M.get_role_base_dbid()))
+    end
 end
 
 function M.sync_data()
@@ -204,6 +211,12 @@ function M.close()
         data_access.save("player_data", _PLAYER_DATA, {"online", "onlineTime"})
     end
     data_access.set_offline(_GLOBAL._SERVER_ID, _GLOBAL._ACC_ID)
+    if _ROLE_BASE then
+        skynet.send(".handle_message", "lua", "unbind_role_entity", M.get_role_base_dbid())
+        data_access.set_role_offline(_GLOBAL._SERVER_ID, M.get_role_base_dbid())
+        logger.info("player close, role_id=%s, cur_proc_id=%s", 
+        M.get_role_base_dbid(), data_access.is_role_online(_GLOBAL._SERVER_ID, M.get_role_base_dbid()))
+    end
 end
 
 function M.get_role_base_dbid()
@@ -216,6 +229,22 @@ end
 
 function M.get_player_data()
     return _PLAYER_DATA
+end
+
+
+
+--@data_desc
+function M.showWorldAgentData(data_desc)
+    local data_map = {
+        ["player_data"] = _PLAYER_DATA,
+        ["role_base"] = _ROLE_BASE,
+        ["role_data"] = _ROLE_DATA,
+    }
+    local data = data_map[data_desc]
+    if not data then
+        return "data not found"
+    end
+    return util.serialize(data)
 end
 
 return M

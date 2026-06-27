@@ -15,6 +15,8 @@ local TABLE_MAP = {
     role_guild = DBDef.Table.role.role_guild,
     bag_slots = DBDef.Table.role.bag_slots,
     bag = DBDef.Table.role.bag,
+    task = DBDef.Table.role.task,
+    partner_list = DBDef.Table.role.partner_list,
 }
 
 local function is_multi_row(table_def)
@@ -348,17 +350,61 @@ function M.insert(table_name, row)
     return true, insert_id
 end
 
+--@server_id
+--@dbid
+function M.set_role_online(server_id, dbid)
+    local addr = redis_addr()
+    if not addr then
+        return false
+    end
+    local cur_proc_id = skynet.getenv("proc_id") or 1
+    skynet.call(
+        addr,
+        "lua",
+        "set",
+        string.format(const.redis_key.world_role, server_id, dbid),
+        cur_proc_id
+    )
+    return true
+end
+
+--@server_id
+--@dbid
+function M.set_role_offline(server_id, dbid)
+    local addr = redis_addr()
+    if not addr then
+        return false
+    end
+    skynet.call(addr, "lua", "del", string.format(const.redis_key.world_role, server_id, dbid))
+    return true
+end
+
+--@server_id
+--@dbid
+function M.is_role_online(server_id, dbid)
+    local addr = redis_addr()
+    if not addr then
+        return false
+    end
+    return skynet.call(addr, "lua", "get", string.format(const.redis_key.world_role, server_id, dbid))
+end
+
+--@server_id
+--@acc_id
+--@login_time
 function M.set_online(server_id, acc_id, login_time)
     local addr = redis_addr()
     if not addr then
         return false
     end
+
+    local cur_proc_id = skynet.getenv("proc_id") or 1
     skynet.call(
         addr,
         "lua",
         "set",
         string.format(const.redis_key.online, server_id, acc_id),
-        "1"
+        cur_proc_id
     )
     skynet.call(
         addr,
@@ -371,6 +417,8 @@ function M.set_online(server_id, acc_id, login_time)
     return true
 end
 
+--@server_id
+--@acc_id
 function M.set_offline(server_id, acc_id)
     local addr = redis_addr()
     if not addr then
@@ -385,6 +433,8 @@ function M.set_offline(server_id, acc_id)
     return true
 end
 
+--@server_id
+--@acc_id
 function M.is_online(server_id, acc_id)
     local addr = redis_addr()
     if not addr then
@@ -396,7 +446,7 @@ function M.is_online(server_id, acc_id)
         "exists",
         string.format(const.redis_key.online, server_id, acc_id)
     )
-    return ret and ret == 1
+    return ret
 end
 
 function M.build_row_key(table_name, row)
@@ -416,6 +466,38 @@ function M.collect_bag_slot_row_keys(parent_dbid)
     local rows = M.load_many_from_mysql(table_def, { parentDBID = parent_dbid }) or {}
     for _, row in ipairs(rows) do
         local row_key = M.build_row_key("bag_slots", row)
+        if row_key then
+            table.insert(keys, row_key)
+        end
+    end
+    return keys
+end
+
+function M.collect_task_row_keys(parent_dbid)
+    local keys = {}
+    if not parent_dbid or parent_dbid == 0 then
+        return keys
+    end
+    local table_def = TABLE_MAP.task
+    local rows = M.load_many_from_mysql(table_def, { parentDBID = parent_dbid }) or {}
+    for _, row in ipairs(rows) do
+        local row_key = M.build_row_key("task", row)
+        if row_key then
+            table.insert(keys, row_key)
+        end
+    end
+    return keys
+end
+
+function M.collect_partner_list_row_keys(parent_dbid)
+    local keys = {}
+    if not parent_dbid or parent_dbid == 0 then
+        return keys
+    end
+    local table_def = TABLE_MAP.partner_list
+    local rows = M.load_many_from_mysql(table_def, { parentDBID = parent_dbid }) or {}
+    for _, row in ipairs(rows) do
+        local row_key = M.build_row_key("partner_list", row)
         if row_key then
             table.insert(keys, row_key)
         end
@@ -451,6 +533,14 @@ function M.collect_player_row_keys(player_data, role_base, role_data)
         local slot_keys = M.collect_bag_slot_row_keys(role_data.parentDBID)
         for _, slot_key in ipairs(slot_keys) do
             table.insert(keys, slot_key)
+        end
+        local task_keys = M.collect_task_row_keys(role_data.parentDBID)
+        for _, task_key in ipairs(task_keys) do
+            table.insert(keys, task_key)
+        end
+        local partner_keys = M.collect_partner_list_row_keys(role_data.parentDBID)
+        for _, partner_key in ipairs(partner_keys) do
+            table.insert(keys, partner_key)
         end
     end
     return keys
@@ -499,6 +589,12 @@ function M.build_row_keys_for_evict(server_id, act_id, player_data)
             add(M.build_row_key("bag", { parentDBID = dbid }))
             for _, slot_key in ipairs(M.collect_bag_slot_row_keys(dbid)) do
                 add(slot_key)
+            end
+            for _, task_key in ipairs(M.collect_task_row_keys(dbid)) do
+                add(task_key)
+            end
+            for _, partner_key in ipairs(M.collect_partner_list_row_keys(dbid)) do
+                add(partner_key)
             end
         end
     end

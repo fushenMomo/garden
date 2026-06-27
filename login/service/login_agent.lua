@@ -147,7 +147,7 @@ local function generate_gateway_proc_id(server_id)
 end
 
 
-function REQUEST:selectServer()
+function REQUEST:select_server()
 	local server_id = tonumber(self.server_id) or 0
 	local server_info = skynet.call(_WATCHDOG, "lua", "get_server_info", server_id)
 	logger.info("selectServer request, server_id=%s, server_info=%s", server_id, util.serialize(server_info))

@@ -52,9 +52,13 @@ local function init_db_redis()
 end
 
 skynet.start(function()
-	-- 初始化业务日志记录器
-	logger.init()
-	logger.info("business logger initialized")
+	local proc_id = tonumber(skynet.getenv("proc_id")) or 1
+	local login_count = tonumber(skynet.getenv("login_count")) or 1
+	assert(proc_id)
+
+	local log_dir = "../log/login/login_" .. proc_id
+	logger.init({base_dir = log_dir})
+	logger.info("business logger initialized, proc_id=%s login_count=%s", proc_id, login_count)
 	-- 启动配置管理服务，用于管理配置文件
 	skynet.uniqueservice("config_mgr")
 	-- 启动协议加载服务
@@ -65,8 +69,8 @@ skynet.start(function()
 	
 	local nodename = skynet.getenv("nodename")
 	assert(nodename)
-	-- 打开当前节点的集群功能，允许其他集群节点与本节点通信
-	cluster.open(nodename)
+	local cluster_name = string.format("login_%s", proc_id)
+	cluster.open(cluster_name)
 
 	-- 启动账号服务，用于管理登录进程的账号信息
 	local account_service = skynet.uniqueservice("service/account_service")
