@@ -113,7 +113,11 @@ gateway_3_1, gateway_3_2, worldMgr_3_1, bi_3_1, world_3_1, world_3_2
 
 ### 拓扑与配置
 
-进程拓扑由 `etc/topology.yaml` 作为单一数据源，通过 `tools/gen_config.lua` 生成 `config.*`、`clustername.*`、`start.sh`。
+进程拓扑由 `etc/topology.yaml` 作为单一数据源，通过 `tools/gen_config.lua` 生成 `config.*`、`clustername.*`、`start.sh`、`stop.sh`、`kill.sh`。
+使用举例:
+lua tools/gen_config.lua          # 生成 config.* / clustername.* / start.sh
+lua tools/gen_config.lua --check  # 端口冲突检测
+lua tools/gen_config.lua --dump-ports  # 端口一览
 
 命名规则：`{type}_{server_id}_{proc_id}`
 
