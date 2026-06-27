@@ -10,6 +10,7 @@ lua_cpath = "./luaclib/?.so"
 
 cpath = "./cservice/?.so"
 
+
 nodename = "bi"
 cluster = "../etc/clustername.bi_3_1"
 server_id = 3
@@ -20,15 +21,17 @@ daemon = "../log/bi/bi_3_1.pid"
 logger = "../log/bi/bi_3_1.log"
 logger_level = "INFO"
 
-debug_console = 9026
-
-REDIS_HOST = "192.168.178.129"
-REDIS_PORT = 8004
-REDIS_PASSWORD = "r12345"
-REDIS_DB_INDEX = 1
+debug_console = 9027
 
 DB_LOGIN_NAME = "sk_login"
 DB_LOGIN_HOST = "192.168.178.129"
 DB_LOGIN_PORT = 3306
 DB_LOGIN_USER = "yaofan"
 DB_LOGIN_PASSWORD = "123456"
+
+REDIS_HOST = "192.168.178.129"
+REDIS_PORT = 8003
+REDIS_PASSWORD = "r12345"
+REDIS_DB_INDEX = 1
+
+

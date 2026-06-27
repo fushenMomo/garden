@@ -1,36 +1,29 @@
 thread = 8
 harbor = 0
 start = "world_main"
-bootstrap = "snlua bootstrap"	-- The service for bootstrap
+bootstrap = "snlua bootstrap"
 luaservice = "../world/?.lua;./service/?.lua;../world/service/standalone/?.lua;../common/?.lua"
 lualoader = "./lualib/loader.lua"
 
--- 给 require 用
 lua_path = "./lualib/?.lua;./lualib/?/init.lua;../?.lua"
 lua_cpath = "./luaclib/?.so"
 
-
--- C 服务（比如 logger.so）
 cpath = "./cservice/?.so"
 
--- 集群
+
 nodename = "world"
 cluster = "../etc/clustername.world_1_2"
 server_id = 1
 proc_id = 2
 
--- 日志
 daemon = "../log/world/world_1_2.pid"
 logger = "../log/world/world_core_1_2.log"
 logger_level = "INFO"
 
 debug_console = 20002
 
--- 功能服 TCP
-world_maxclient = 2048 -- 最大连接数
+world_maxclient = 2048
 
-
--- 数据库代理
 DB_GAME_NAME = "sk_s%s_game"
 DB_GAME_HOST = "192.168.178.129"
 DB_GAME_PORT = 3306
@@ -44,17 +37,10 @@ DB_GLOBAL_USER = "yaofan"
 DB_GLOBAL_PASSWORD = "123456"
 
 REDIS_HOST = "192.168.178.129"
-REDIS_PORT = 8002
+REDIS_PORT = 8001
 REDIS_PASSWORD = "r12345"
 REDIS_DB_INDEX = 1
 
 
--- 特定功能服
 WORLD_FUNC_FLAG = "guild"
-
-
-
-
-
-
 

@@ -1,37 +1,29 @@
 thread = 8
 harbor = 0
 start = "gateway_main"
-bootstrap = "snlua bootstrap"	-- The service for bootstrap
+bootstrap = "snlua bootstrap"
 luaservice = "../gateway/?.lua;../common/?.lua;./service/?.lua;"
 lualoader = "./lualib/loader.lua"
 
--- ? require ?
 lua_path = "./lualib/?.lua;./lualib/?/init.lua;../?.lua"
 lua_cpath = "./luaclib/?.so"
 
-
--- C ????? logger.so?
 cpath = "./cservice/?.so"
 
--- ??
+
 nodename = "gateway"
 cluster = "../etc/clustername.gateway_2_2"
 server_id = 2
 proc_id = 2
 login_count = 2
 
--- ??
 daemon = "../log/gateway/gateway_2_2.pid"
 logger = "../log/gateway/gateway_core_2_2.log"
 logger_level = "INFO"
 
 debug_console = 9034
 
--- ??? TCP
 gateway_port = 8892
 gateway_maxclient = 1024
 gateway_package_max = 8192
-
-
-
 

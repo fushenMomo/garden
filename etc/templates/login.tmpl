@@ -1,0 +1,18 @@
+{{skynet}}
+
+nodename = "login"
+proc_id = {{proc_id}}
+login_count = {{login_count}}
+cluster = "../etc/clustername.{{name}}"
+
+daemon = "../log/login/{{name}}.pid"
+logger = "../log/login/login_core_{{proc_id}}.log"
+logger_level = "{{logger_level}}"
+
+debug_console = {{debug_port}}
+login_port = {{tcp_port}}
+login_maxclient = {{login_maxclient}}
+login_package_max = {{login_package_max}}
+
+{{db_login}}
+{{redis}}

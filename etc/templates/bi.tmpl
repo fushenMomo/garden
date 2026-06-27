@@ -1,0 +1,16 @@
+{{skynet}}
+
+nodename = "bi"
+cluster = "../etc/clustername.{{name}}"
+server_id = {{server_id}}
+proc_id = {{proc_id}}
+login_count = {{login_count}}
+
+daemon = "../log/bi/{{name}}.pid"
+logger = "../log/bi/{{name}}.log"
+logger_level = "{{logger_level}}"
+
+debug_console = {{debug_port}}
+
+{{db_login}}
+{{redis}}

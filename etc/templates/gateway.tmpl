@@ -1,0 +1,17 @@
+{{skynet}}
+
+nodename = "gateway"
+cluster = "../etc/clustername.{{name}}"
+server_id = {{server_id}}
+proc_id = {{proc_id}}
+login_count = {{login_count}}
+
+daemon = "../log/gateway/{{name}}.pid"
+logger = "../log/gateway/gateway_core_{{server_id}}_{{proc_id}}.log"
+logger_level = "{{logger_level}}"
+
+debug_console = {{debug_port}}
+
+gateway_port = {{tcp_port}}
+gateway_maxclient = {{gateway_maxclient}}
+gateway_package_max = {{gateway_package_max}}

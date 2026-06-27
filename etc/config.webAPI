@@ -7,7 +7,9 @@ lualoader = "./lualib/loader.lua"
 
 lua_path = "./lualib/?.lua;./lualib/?/init.lua;../?.lua"
 lua_cpath = "./luaclib/?.so"
+
 cpath = "./cservice/?.so"
+
 
 nodename = "webAPI"
 cluster = "../etc/clustername.webAPI"
@@ -22,3 +24,4 @@ http_protocol = "http"
 http_agent_count = 8
 http_body_limit = 65536
 web_api_key = ""
+

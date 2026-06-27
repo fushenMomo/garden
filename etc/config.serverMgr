@@ -1,24 +1,20 @@
 thread = 8
 harbor = 0
 start = "serverMgr_main"
-bootstrap = "snlua bootstrap"	-- The service for bootstrap
+bootstrap = "snlua bootstrap"
 luaservice = "../serverMgr/?.lua;./service/?.lua;../common/?.lua"
 lualoader = "./lualib/loader.lua"
 
--- ? require ?
 lua_path = "./lualib/?.lua;./lualib/?/init.lua;../?.lua"
 lua_cpath = "./luaclib/?.so"
 
-
--- C ????? logger.so?
 cpath = "./cservice/?.so"
 
--- ??
+
 nodename = "serverMgr"
 login_count = 2
 cluster = "../etc/clustername.serverMgr"
 
--- ??
 daemon = "../log/serverMgr/serverMgr.pid"
 logger = "../log/serverMgr/serverMgr.log"
 logger_level = "INFO"

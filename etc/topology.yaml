@@ -1,60 +1,52 @@
-# 进程拓扑描述（单一数据源，由 tools/gen_config.lua 生成 config.* / clustername.* / start.sh）
-# 命名: {type}_{server_id}_{proc_id}，type=进程类型，server_id=服务器组编号，proc_id=组内进程编号
+# 单一数据源 -> tools/gen_config.lua -> config.* / clustername.* / start.sh / stop.sh / kill.sh
+# 命名: {type}_{server_id}_{proc_id}
 
 host: "127.0.0.1"
 
-ports:
-  cluster:
-    webapi: 2525
-    login: 2526
-    servermgr: 2527
-    worldmgr_base: 2528      # worldMgr_{sid}_1 => base + (sid - 1)
-    gateway_base: 2530         # gateway_{sid}_{pid} => base + 前序组gateway总数 + (pid - 1)
-    world_base: 2540           # world_{sid}_{pid} => base + 前序组world总数 + (pid - 1)
-  tcp:
-    login: 8888
-    webapi: 8900
-    gateway_base: 8889         # gateway_{sid}_{pid} => base + 前序组gateway总数 + (pid - 1)
-
 global:
   login:
-    redis_port: 8001
-  serverMgr: {}
+    count: 2
+
+ports:
+  mysql: 3306
+  redis:
+    login: 8000
+    group_base: 8001
+  cluster:
+    webapi: 2525
+    servermgr: 2527
+    worldmgr_base: 2528
+    gateway_base: 2530
+    world_base: 2540
+    bi_base: 2544
+    login_base: 2560
+  tcp:
+    login_base: 8888
+    login_step: 10
+    webapi: 8900
+    gateway_base: 8889
+  debug_console:
+    login_base: 9000
+    webapi: 9002
+    servermgr: 9011
+    worldmgr_base: 9021
+    bi_offset: 2
+    gateway_base: 9030
+    world_base: 20000
 
 groups:
   - id: 1
     gateway_count: 2
     world_count: 2
-    redis_port: 8002
+    bi: true
   - id: 2
     gateway_count: 2
     world_count: 2
-    redis_port: 8003
+    bi: true
   - id: 3
     gateway_count: 2
     world_count: 2
-    redis_port: 8004
-
-startup_order:
-  - serverMgr
-  - login
-  - webAPI
-  - gateway_1_1
-  - gateway_1_2
-  - worldMgr_1_1
-  - world_1_1
-  - world_1_2
-  - gateway_2_1
-  - gateway_2_2
-  - worldMgr_2_1
-  - world_2_1
-  - world_2_2
-  - gateway_3_1
-  - gateway_3_2
-  - worldMgr_3_1
-  - bi_3_1
-  - world_3_1
-  - world_3_2
+    bi: true
 
 skynet:
   thread: 8
@@ -72,6 +64,8 @@ process:
     luaservice: "../webAPI/?.lua;../common/?.lua;./service/?.lua;"
     http_agent_count: 8
     http_body_limit: 65536
+    http_protocol: "http"
+    web_api_key: ""
   login:
     start: "login_main"
     luaservice: "../login/?.lua;../common/?.lua;./service/?.lua;"
@@ -79,7 +73,7 @@ process:
     login_package_max: 8192
   serverMgr:
     start: "serverMgr_main"
-    luaservice: "../serverMgr/?.lua;../common/?.lua;./service/?.lua;"
+    luaservice: "../serverMgr/?.lua;./service/?.lua;../common/?.lua"
   gateway:
     start: "gateway_main"
     luaservice: "../gateway/?.lua;../common/?.lua;./service/?.lua;"
@@ -88,10 +82,14 @@ process:
   worldMgr:
     start: "worldMgr_main"
     luaservice: "../worldMgr/?.lua;../common/?.lua;./service/?.lua;"
+    guild_world_proc_id: 2
   world:
     start: "world_main"
-    luaservice: "../world/?.lua;../common/?.lua;./service/?.lua;"
+    luaservice: "../world/?.lua;./service/?.lua;../world/service/standalone/?.lua;../common/?.lua"
     world_maxclient: 2048
+  bi:
+    start: "bi_main"
+    luaservice: "../bi/?.lua;../common/?.lua;./service/?.lua;"
 
 db:
   login:
@@ -102,6 +100,12 @@ db:
     password: "123456"
   game:
     name: "sk_s%s_game"
+    host: "192.168.178.129"
+    port: 3306
+    user: "yaofan"
+    password: "123456"
+  global:
+    name: "sk_s%s_global"
     host: "192.168.178.129"
     port: 3306
     user: "yaofan"

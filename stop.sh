@@ -1,7 +1,6 @@
 #!/bin/bash
 
 GRACEFUL_TIMEOUT=30
-
 get_pid() {
     local tag=$1
     local pidfile=$2
@@ -20,7 +19,6 @@ get_pid() {
     fi
     return 1
 }
-
 graceful_stop_one() {
     local tag=$1
     local pidfile=$2
@@ -45,7 +43,6 @@ graceful_stop_one() {
     echo "force stopping $tag ..."
     kill "$pid" 2>/dev/null || true
 }
-
 force_stop_one() {
     local tag=$1
     local pidfile=$2
@@ -79,12 +76,13 @@ WORLDMGR_LIST=(
 )
 
 OTHER_LIST=(
+    "skynet_serverMgr:log/serverMgr/serverMgr.pid"
+    "skynet_login_1:log/login/login_1.pid"
+    "skynet_login_2:log/login/login_2.pid"
+    "skynet_webAPI:log/webAPI/webAPI.pid"
     "skynet_bi_1_1:log/bi/bi_1_1.pid"
     "skynet_bi_2_1:log/bi/bi_2_1.pid"
     "skynet_bi_3_1:log/bi/bi_3_1.pid"
-    "skynet_webAPI:log/webAPI/webAPI.pid"
-    "skynet_login:log/login/login.pid"
-    "skynet_serverMgr:log/serverMgr/serverMgr.pid"
 )
 
 HAS_RUNNING=0

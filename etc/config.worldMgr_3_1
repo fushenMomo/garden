@@ -1,34 +1,28 @@
 thread = 8
 harbor = 0
 start = "worldMgr_main"
-bootstrap = "snlua bootstrap"	-- The service for bootstrap
+bootstrap = "snlua bootstrap"
 luaservice = "../worldMgr/?.lua;../common/?.lua;./service/?.lua;"
 lualoader = "./lualib/loader.lua"
 
--- 给 require 用
 lua_path = "./lualib/?.lua;./lualib/?/init.lua;../?.lua"
 lua_cpath = "./luaclib/?.so"
 
-
--- C 服务（比如 logger.so）
 cpath = "./cservice/?.so"
 
--- 集群
+
 nodename = "worldMgr"
 cluster = "../etc/clustername.worldMgr_3_1"
 server_id = 3
 proc_id = 1
 
-gateway_count = 2 -- WorldMgr旗下有多少个gateway进程
+gateway_count = 2
 
--- 日志
 daemon = "../log/worldMgr/worldMgr_3_1.pid"
 logger = "../log/worldMgr/worldMgr_3_1.log"
 logger_level = "INFO"
 
-debug_console = 9025
-
--- 数据库代理
+debug_console = 9026
 DB_GAME_NAME = "sk_s%s_game"
 DB_GAME_HOST = "192.168.178.129"
 DB_GAME_PORT = 3306
@@ -42,14 +36,10 @@ DB_GLOBAL_USER = "yaofan"
 DB_GLOBAL_PASSWORD = "123456"
 
 REDIS_HOST = "192.168.178.129"
-REDIS_PORT = 8004
+REDIS_PORT = 8003
 REDIS_PASSWORD = "r12345"
 REDIS_DB_INDEX = 1
 
--- 联盟进程ID
+
 GUILD_WORLD_PROC_ID = 2
-
-
-
-
 

@@ -1,0 +1,15 @@
+{{skynet}}
+
+nodename = "webAPI"
+cluster = "../etc/clustername.{{name}}"
+
+daemon = "../log/webAPI/{{name}}.pid"
+logger = "../log/webAPI/webAPI_core.log"
+logger_level = "{{logger_level}}"
+
+debug_console = {{debug_port}}
+http_port = {{tcp_port}}
+http_protocol = "{{http_protocol}}"
+http_agent_count = {{http_agent_count}}
+http_body_limit = {{http_body_limit}}
+web_api_key = "{{web_api_key}}"

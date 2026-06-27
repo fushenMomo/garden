@@ -18,7 +18,6 @@ get_pid() {
     fi
     return 1
 }
-
 kill_one() {
     local tag=$1
     local pidfile=$2
@@ -47,13 +46,13 @@ ALL_LIST=(
     "skynet_worldMgr_1_1:log/worldMgr/worldMgr_1_1.pid"
     "skynet_worldMgr_2_1:log/worldMgr/worldMgr_2_1.pid"
     "skynet_worldMgr_3_1:log/worldMgr/worldMgr_3_1.pid"
+    "skynet_serverMgr:log/serverMgr/serverMgr.pid"
+    "skynet_login_1:log/login/login_1.pid"
+    "skynet_login_2:log/login/login_2.pid"
+    "skynet_webAPI:log/webAPI/webAPI.pid"
     "skynet_bi_1_1:log/bi/bi_1_1.pid"
     "skynet_bi_2_1:log/bi/bi_2_1.pid"
     "skynet_bi_3_1:log/bi/bi_3_1.pid"
-    "skynet_webAPI:log/webAPI/webAPI.pid"
-    "skynet_login_1:log/login/login_1.pid"
-    "skynet_login_2:log/login/login_2.pid"
-    "skynet_serverMgr:log/serverMgr/serverMgr.pid"   
 )
 
 for item in "${ALL_LIST[@]}"; do

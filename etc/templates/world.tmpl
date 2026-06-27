@@ -1,0 +1,19 @@
+{{skynet}}
+
+nodename = "world"
+cluster = "../etc/clustername.{{name}}"
+server_id = {{server_id}}
+proc_id = {{proc_id}}
+
+daemon = "../log/world/{{name}}.pid"
+logger = "../log/world/world_core_{{server_id}}_{{proc_id}}.log"
+logger_level = "{{logger_level}}"
+
+debug_console = {{debug_port}}
+
+world_maxclient = {{world_maxclient}}
+
+{{db_game}}
+{{db_global}}
+{{redis}}
+{{world_func_flag}}

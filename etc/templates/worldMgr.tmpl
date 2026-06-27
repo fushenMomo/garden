@@ -1,0 +1,19 @@
+{{skynet}}
+
+nodename = "worldMgr"
+cluster = "../etc/clustername.{{name}}"
+server_id = {{server_id}}
+proc_id = {{proc_id}}
+
+gateway_count = {{gateway_count}}
+
+daemon = "../log/worldMgr/{{name}}.pid"
+logger = "../log/worldMgr/{{name}}.log"
+logger_level = "{{logger_level}}"
+
+debug_console = {{debug_port}}
+{{db_game}}
+{{db_global}}
+{{redis}}
+
+GUILD_WORLD_PROC_ID = {{guild_world_proc_id}}
